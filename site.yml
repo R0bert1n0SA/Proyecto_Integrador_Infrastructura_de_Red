@@ -1,0 +1,10 @@
+---
+- name: Configurar Infraestructura Integral
+  hosts: Infraestructura  
+  become: yes 
+
+  roles:
+    - DNS
+    - DHCP
+    - LDAP
+    - SFTP-SSH

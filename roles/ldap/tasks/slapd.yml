@@ -1,0 +1,44 @@
+---
+# Pre-configuración de las pantallas azules (Debconf)
+- name: Configurar respuestas para slapd (LDAP)
+  debconf:
+    name: "slapd"
+    question: "{{ item.question }}"
+    value: "{{ item.value }}"
+    vtype: "{{ item.vtype }}"
+  with_items:
+    # 1. ¿Omitir configuración? -> NO (false)
+    - { question: 'slapd/no_configuration', value: 'false', vtype: 'boolean' }
+    
+    # 2. Nombre de dominio DNS )
+    - { question: 'slapd/domain', value: "{{  ldap_domain  }}", vtype: 'string' }
+    
+    # 3. Nombre de la Organización
+    - { question: 'slapd/organization', value: "{{ ldap_organization }}", vtype: 'string' }
+    
+    # 4. Contraseñas 
+    - { question: 'slapd/internal/admin_password', value: "{{ ldap_admin_pass }}", vtype: 'password' }
+
+    - { question: 'slapd/internal/admin_password_confirmation', value: "{{ ldap_admin_pass }}", vtype: 'password' }
+    
+    # 5. Motor de base de datos 
+    - { question: 'slapd/backend', value: 'MDB', vtype: 'select' }
+    
+    # 6. ¿Borrar base de datos al purgar el paquete? - por seguridad 
+    - { question: 'slapd/purge_database', value: 'false', vtype: 'boolean' }
+
+    # 7. ¿Mover base de datos antigua? → SI (true) - hace backup
+    - { question: 'slapd/move_old_database', value: 'true', vtype: 'boolean' }
+
+    # 8. ¿Permitir LDAPv2? -> NO (inseguro)
+    - { question: 'slapd/allow_ldap_v2', value: 'false', vtype: 'boolean' }
+
+# Instalación de paquete
+- name: Instalación de slapd,ldap-utils
+  apt:
+    name:
+      - slapd
+      - ldap-utils
+    state: present
+
+

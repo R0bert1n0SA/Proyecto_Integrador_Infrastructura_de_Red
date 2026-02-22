@@ -1,0 +1,17 @@
+---
+# vars file for Roles/ldap
+ldap_domain: "luthor.corp"
+ldap_base_dn: "dc=luthor,dc=corp"
+ldap_admin_pass: "1234"
+ldap_organization: "luthor.corp"
+ldap_uri: "ldap://auth.luthor.corp"
+ldap_BDB: "MDB"
+ldap_packages:
+  - slapd
+  - ldap-utils
+  - samba
+  - smbclient
+  - winbind
+  - libpam-winbind
+  - libnss-winbind
+  - nslcd
