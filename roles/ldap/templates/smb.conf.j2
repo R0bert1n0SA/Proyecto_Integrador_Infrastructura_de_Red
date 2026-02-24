@@ -1,0 +1,45 @@
+[global]
+   workgroup = {{ samba_workgroup | lower }}
+   realm = {{ ldap_domain }}
+   netbios name = {{ ansible_hostname | upper }}
+   security = user
+   
+   passdb backend = ldapsam:ldap://localhost
+   
+   domain master = yes
+   domain logons = yes
+   
+   # Configuración de mapeo de IDs
+   idmap config * : backend = tdb
+   idmap config * : range = 1000-9999
+   idmap config {{ samba_workgroup }} : backend = ldap
+   idmap config {{ samba_workgroup }} : range = 10000-99999
+   idmap config {{ samba_workgroup }} : ldap_url = ldap://localhost
+   idmap config {{ samba_workgroup }} : ldap_base_dn = {{ ldap_base_dn }}
+   idmap config {{ samba_workgroup }} : ldap_user_dn = {{ ldap_service_user_dn }}
+   
+   ldap suffix = {{ ldap_base_dn }}
+   ldap admin dn = {{ ldap_admin_dn }}
+   ldap passwd sync = yes
+   
+   winbind enum users = yes
+   winbind enum groups = yes
+   winbind use default domain = yes
+   
+   add machine script = /usr/sbin/useradd -c "Machine" -d /var/lib/samba -s /bin/false %u
+
+[sysvol]
+   path = /var/lib/samba/sysvol
+   read only = no
+
+[netlogon]
+   path = /var/lib/samba/netlogon
+   read only = no
+
+[homes]
+   comment = Home Directories
+   browseable = no
+   read only = no
+   writable = yes
+   create mask = 0700
+   directory mask = 0700

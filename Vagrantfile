@@ -22,7 +22,7 @@ Vagrant.configure("2") do |config|
 
 
   config.vm.provision "ansible" do |ansible|
-    ansible.playbook = "site-ldaptest.yml"
+    ansible.playbook = "site.yml"
     # Esto es para que no te pida confirmación de huella digital SSH
     ansible.extra_vars = { ansible_ssh_common_args: "-o StrictHostKeyChecking=no" }
   end

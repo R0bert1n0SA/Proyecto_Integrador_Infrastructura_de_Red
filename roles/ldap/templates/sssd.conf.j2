@@ -1,0 +1,16 @@
+[sssd]
+services = nss, pam
+config_file_version = 2
+domains = {{ ldap_domain }}
+
+[domain/{{ ldap_domain }}]
+id_provider = ldap
+auth_provider = ldap
+ldap_uri = ldap://127.0.0.0
+ldap_search_base = {{ ldap_base_dn }}
+ldap_bind_dn = cn=admin,{{ ldap_base_dn }}
+ldap_bind_authtok = {{ ldap_admin_pass }}
+ldap_id_use_start_tls = false
+enumerate = true
+cache_credentials = True
+ldap_tls_reqcert = never

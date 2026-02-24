@@ -6,12 +6,14 @@ ldap_admin_pass: "1234"
 ldap_organization: "luthor.corp"
 ldap_uri: "ldap://auth.luthor.corp"
 ldap_BDB: "MDB"
+samba_workgroup: "luthor"
+ansible_hostname: "Ldap_Server"
+ldap_service_user_dn: "cn=serviceU,dc=luthor,dc=corp"
+ldap_admin_dn: "cn=admin,dc=luthor,dc=corp"
+
 ldap_packages:
   - slapd
   - ldap-utils
   - samba
   - smbclient
-  - winbind
-  - libpam-winbind
-  - libnss-winbind
-  - nslcd
+  - sssd

@@ -1,0 +1,36 @@
+---
+# 1. Creamos un archivo temporal con los cambios (usando formato LDIF)
+- name: Crear archivo LDIF para desactivar acceso anónimo
+  copy:
+    dest: /tmp/disable_bind_anon.ldif
+    content: |
+      dn: cn=config
+      changetype: modify
+      add: olcDisallows
+      olcDisallows: bind_anon
+
+      dn: cn=config
+      changetype: modify
+      add: olcRequires
+      olcRequires: bind
+
+      dn: olcDatabase={1}mdb,cn=config
+      changetype: modify
+      add: olcAccess
+      olcAccess: {0}to attrs=userPassword by self write by anonymous auth by dn="cn=admin,{{ ldap_base_dn }}" write by * none
+      olcAccess: {1}to * by dn="cn=servicioUser,ou=servicios,{{ ldap_base_dn }}" read by dn="cn=admin,{{ ldap_base_dn }}" write by * none
+
+# 2. Aplicamos el cambio al árbol de configuración (cn=config)
+- name: Aplicar desactivación de modo anónimo y ACLs
+  shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /tmp/disable_bind_anon.ldif
+  register: security_result
+  failed_when: 
+    - security_result.rc != 0 
+    - "'Already exists' not in security_result.stderr"
+    - "'Type or value exists' not in security_result.stderr"
+
+# 3. Limpiar el archivo temporal
+- name: Borrar archivo temporal de seguridad
+  file:
+    path: /tmp/disable_bind_anon.ldif
+    state: absent

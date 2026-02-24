@@ -1,2 +1,5 @@
 ---
-# handlers file for Roles/ldap
+ - name: Reiniciar SSSD
+   systemd:
+      name: sssd
+      state: restarted

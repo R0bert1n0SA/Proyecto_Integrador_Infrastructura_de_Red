@@ -29,46 +29,35 @@
       - ldap-utils
       - samba
       - smbclient
-      - winbind
+      - sssd
+      - sssd-ldap
+      - libpam-sss
+      - libnss-sss
     state: present
 
-# 5. DEBCONF LIBPAM-LDAPD
-- name: Incluir debconf de libpam-ldapd
-  import_tasks: libpam-winbind.yml
+# Creás el directorio por las dudas (a veces no existe)
+- name: Asegurar que existe el directorio de sssd
+  file:
+    path: /etc/sssd
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
 
-# 6. DEBCONF NSLCD
-- name: Incluir debconf de nslcd
-  import_tasks: nslcd.yml
+# Desplegás el template
+- name: Configurar sssd.conf
+  template:
+    src: sssd.conf.j2
+    dest: /etc/sssd/sssd.conf
+    owner: root
+    group: root
+    mode: '0600'
+  notify: Reiniciar SSSD
 
-- name: Configurar respuestas para nslcd (LDAP URI y Base)
-  debconf:
-    name: "nslcd"
-    question: "{{ item.question }}"
-    value: "{{ item.value }}"
-    vtype: "{{ item.vtype }}"
-  with_items:
-    - { question: 'nslcd/ldap-uris', value: "{{ ldap_uri }}", vtype: 'string' }
-    - { question: 'nslcd/ldap-base', value: "{{ ldap_base_dn }}", vtype: 'string' }
-
-
-- name: Configurar nsswitch.conf para usar LDAP
-  lineinfile:
-    path: /etc/nsswitch.conf
-    regexp: "^{{ item }}:"
-    line: "{{ item }}:         files ldap"
-  with_items:
-    - passwd
-    - group
-    - shadow
-
-
-# 4. Instalación de paquetes (Ahora sí, sin interrupciones)
-- name: Instalación de paquetes
-  apt:
-    name:
-      - libpam-winbind
-      - libnss-winbind
-      - nslcd
-    state: present
-
+# Habilitás el servicio
+- name: Habilitar SSSD en el arranque
+  systemd:
+    name: sssd
+    enabled: yes
+    daemon_reload: yes
 
