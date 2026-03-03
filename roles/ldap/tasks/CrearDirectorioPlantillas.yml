@@ -1,0 +1,20 @@
+---
+- name: Crear el directorio de plantillas en el servidor
+  file:
+    path: /home/administrador/Plantillas
+    state: directory
+    owner: administrador-ldap
+    group: administrador-ldap
+    mode: '0755'
+
+- name: Subir las plantillas LDIF al servidor
+  copy:
+    src: "{{ item }}"
+    dest: /home/administrador-ldap/Plantillas/
+    owner: administrador-ldap
+    group: administrador-ldap
+    mode: '0644'
+  with_items:
+    - userPlantilla.ldif
+    - groupPlantilla.ldif
+    - ouPlantilla.ldif

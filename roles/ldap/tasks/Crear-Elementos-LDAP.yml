@@ -1,0 +1,33 @@
+- name: Copiar script Crear.sh al servidor
+  copy:
+    src: Crear.sh
+    dest: /home/administrador-ldap/Crear.sh
+    mode: '0755'
+    owner: administrador-ldap
+    group: administrador-ldap
+
+- name: Crear las OUs iniciales usando el script
+  script: Crear.sh 3 "{{ item }}"
+  with_items:
+    - Users
+    - Groups
+    - Machines
+    - Service
+
+- name: Crear las Grupos iniciales usando el script
+  script: Crear.sh 2 "{{ item }}"
+  with_items:
+    -  soporte
+    - desarrollo
+    - administracion
+    - rr-hh
+    - QA
+
+- name: Crear usuarios masivamente por áreas
+  script: Crear.sh 1 "{{ item.area }}" "{{ item.cantidad }}"
+  loop:
+    - { area: 'QA', cantidad: 3 }
+    - { area: 'administracion', cantidad: 5 }
+    - { area: 'rr-hh', cantidad: 3 }
+    - { area: 'desarrollo', cantidad: 3 }
+    - { area: 'soporte', cantidad: 3 }

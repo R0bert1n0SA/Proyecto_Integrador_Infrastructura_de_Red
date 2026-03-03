@@ -1,63 +1,21 @@
 ---
 # tasks file for Roles/ldap
-#1. Actualizar repositorios
-- name: Actualizar repositorios y paquetes (update y upgrade)
-  apt:
-    update_cache: yes
-    upgrade: yes
-    cache_valid_time: 3600
+#1. Actualizar repositorios y reiniciar
+- name: Actualizar repositorios y paquetes y Reiniciar
+  import_tasks: Actualizar-Reiniciar.yml
 
-# 2. sudo reboot
-- name: Reiniciar el servidor si es necesario
-  reboot:
-    msg: "Reiniciando por actualización de sistema de Ansible"
-    connect_timeout: 5
-    reboot_timeout: 300
-    pre_reboot_delay: 0
-    post_reboot_delay: 30
-    test_command: uptime
+# 2. Crear directorio Plantillas
+- name: Crear Carpeta de plantillas
+  import_tasks: CrearDirectorioPlantillas.yml
 
 # 3. DEBCONF SLAPD
 - name: Incluir debconf de slapd
   import_tasks: slapd.yml
 
-# 4. Instalación de paquetes 
-- name: Instalación de paquetes
-  apt:
-    name:
-      - slapd
-      - ldap-utils
-      - samba
-      - smbclient
-      - sssd
-      - sssd-ldap
-      - libpam-sss
-      - libnss-sss
-    state: present
+# 4. Creacion OU, Grupos y Usuarios
+- name: Crear  LDAP
+  import_tasks: Crear-Elementos-LDAP.yml
 
-# Creás el directorio por las dudas (a veces no existe)
-- name: Asegurar que existe el directorio de sssd
-  file:
-    path: /etc/sssd
-    state: directory
-    owner: root
-    group: root
-    mode: '0755'
 
-# Desplegás el template
-- name: Configurar sssd.conf
-  template:
-    src: sssd.conf.j2
-    dest: /etc/sssd/sssd.conf
-    owner: root
-    group: root
-    mode: '0600'
-  notify: Reiniciar SSSD
 
-# Habilitás el servicio
-- name: Habilitar SSSD en el arranque
-  systemd:
-    name: sssd
-    enabled: yes
-    daemon_reload: yes
 

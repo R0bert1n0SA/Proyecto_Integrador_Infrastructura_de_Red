@@ -17,9 +17,9 @@
     - { question: 'slapd/organization', value: "{{ ldap_organization }}", vtype: 'string' }
     
     # 4. Contraseñas 
-    - { question: 'slapd/internal/admin_password', value: "{{ ldap_admin_pass }}", vtype: 'password' }
+    - { question: 'slapd/password1', value: "1234", vtype: 'password' }
 
-    - { question: 'slapd/internal/admin_password_confirmation', value: "{{ ldap_admin_pass }}", vtype: 'password' }
+    - { question: 'slapd/password2', value: "1234", vtype: 'password' }
     
     # 5. Motor de base de datos 
     - { question: 'slapd/backend', value: 'MDB', vtype: 'select' }
@@ -41,4 +41,23 @@
       - ldap-utils
     state: present
 
+- name: Asegurar que slapd está corriendo
+  systemd:
+    name: slapd
+    state: started
+    enabled: yes
 
+- name: Esperar a que slapd responda
+  wait_for:
+    port: 389
+    delay: 2
+    timeout: 30
+
+- name: Verificar configuración de slapd (debug)
+  command: ldapsearch -x -s base -b "" namingContexts
+  register: ldap_check
+  changed_when: false
+
+- name: Mostrar namingContexts
+  debug:
+    var: ldap_check.stdout

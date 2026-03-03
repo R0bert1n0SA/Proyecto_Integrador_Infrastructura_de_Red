@@ -1,0 +1,12 @@
+# =====================================================
+# Plantilla de Grupo LDAP/Samba
+# =====================================================
+dn: cn={id-grupo},ou=Groups,dc=luthor,dc=corp
+objectClass: top
+objectClass: posixGroup
+objectClass: sambaGroupMapping
+cn: {id-grupo}
+gidNumber: {grupo-id}
+displayName: {id-grupo}
+sambaGroupType: 2
+sambaSID: {sid}

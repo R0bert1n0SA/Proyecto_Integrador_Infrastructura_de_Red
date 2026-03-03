@@ -1,30 +1,24 @@
 ---
-#Task/Samba-Schema.yml
-- name: Asegurar que los esquemas de Samba estén descomprimidos y en su lugar
-  shell: |
-    gunzip -c /usr/share/doc/samba/examples/LDAP/samba.ldif.gz > /etc/ldap/schema/samba.ldif
-    gunzip -c /usr/share/doc/samba/examples/LDAP/samba.schema.gz > /etc/ldap/schema/samba.schema
-  args:
-    creates: /etc/ldap/schema/samba.ldif
+# Task/Samba-Schema.yml
 
-- name: Dar permisos correctos a los archivos de esquema
-  file:
-    path: "{{ item }}"
-    owner: openldap
-    group: openldap
+- name: Copiar esquemas de Samba al directorio de LDAP
+  copy:
+    src: "/usr/share/doc/samba/examples/LDAP/{{ item }}"
+    dest: "/etc/ldap/schema/{{ item }}"
+    remote_src: yes  
+    owner: root
+    group: root
     mode: '0644'
   with_items:
-    - /etc/ldap/schema/samba.ldif
-    - /etc/ldap/schema/samba.schema
+    - samba.ldif
+    - samba.schema
 
-- name: Agregar el esquema a la configuración de LDAP
-  shell: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/samba.ldif
-  register: ldap_add_result
-  # Este comando falla si el esquema ya está cargado. 
-  # Con esto evitamos que Ansible marque "Error" si ya existe.
+- name: Agregar el esquema de Samba a la configuración de OpenLDAP
+  shell: "ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/samba.ldif"
+  register: ldap_schema_result
+  # Esto evita que el playbook falle si el esquema ya fue agregado antes
   failed_when: 
-    - ldap_add_result.rc != 0 
-    - "'Already exists' not in ldap_add_result.stderr"
-  changed_when: 
-    - ldap_add_result.rc == 0
+    - ldap_schema_result.rc != 0 
+    - "'Already exists' not in ldap_schema_result.stderr"
+    - "'Other (e.g., implementation specific) error' not in ldap_schema_result.stderr"
 

@@ -1,6 +1,6 @@
 ---
 - name: Configurar Infraestructura Integral
-  hosts: ldap
+  hosts: all
   become: yes 
 
   roles:

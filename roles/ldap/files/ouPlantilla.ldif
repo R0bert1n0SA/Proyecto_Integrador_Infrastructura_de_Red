@@ -1,0 +1,7 @@
+# =====================================================
+# Plantilla de Unidad Organizativa
+# =====================================================
+dn: ou={ou-name},dc=luthor,dc=corp
+objectClass: organizationalUnit
+objectClass: top
+ou: {ou-name}
