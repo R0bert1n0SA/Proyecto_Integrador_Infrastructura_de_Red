@@ -1,0 +1,63 @@
+---
+# Task/Samba-Schema.yml
+
+- name: Instalar Samba
+  apt:
+    name:
+      - samba
+      - smbclient
+    state: present
+    update_cache: yes
+
+- name: Configurar smb.conf desde template
+  template:
+    src: smb.conf.j2
+    dest: /etc/samba/smb.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Verificar si schema samba está cargado
+  shell: |
+    ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=schema,cn=config cn=samba 2>/dev/null | grep -q "dn: cn=samba"
+  register: samba_schema_check
+  failed_when: false
+  changed_when: false
+  ignore_errors: yes
+
+
+- name: Debug - Mostrar si schema existe
+  debug:
+    msg: "Schema samba existe: {{ samba_schema_check.rc == 0 }}"
+
+
+- name: Copiar esquemas de Samba al directorio LDAP
+  copy:
+    src: "/usr/share/doc/samba/examples/LDAP/{{ item }}"
+    dest: "/etc/ldap/schema/{{ item }}"
+    remote_src: yes
+    owner: root
+    group: root
+    mode: '0644'
+  loop:
+    - samba.ldif
+    - samba.schema
+  when: samba_schema_check.rc != 0
+
+- name: Agregar el esquema de Samba a OpenLDAP
+  command: ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/samba.ldif
+  when: samba_schema_check.rc != 0
+
+- name: Verificar schema cargado
+  command: ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=schema,cn=config cn=samba
+  register: schema_final_check
+  changed_when: false
+
+- name: Guardar password LDAP en Samba
+  command: smbpasswd -w {{ ldap_admin_pass }}
+  changed_when: false
+  notify:  Reiniciar Samba
+
+- name: Mostrar schema cargado
+  debug:
+    var: schema_final_check.stdout

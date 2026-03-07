@@ -3,3 +3,8 @@
    systemd:
       name: sssd
       state: restarted
+
+ - name: Reiniciar Samba
+   systemd:
+    name: smbd
+    state: restarted

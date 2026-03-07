@@ -1,5 +1,5 @@
 [global]
-   workgroup = {{ samba_workgroup | lower }}
+   workgroup = {{ samba_workgroup | upper }}
    realm = {{ ldap_domain }}
    netbios name = {{ ansible_hostname | upper }}
    security = user
@@ -21,7 +21,7 @@
    ldap suffix = {{ ldap_base_dn }}
    ldap admin dn = {{ ldap_admin_dn }}
    ldap passwd sync = yes
-   
+   ldap ssl = no
    winbind enum users = yes
    winbind enum groups = yes
    winbind use default domain = yes

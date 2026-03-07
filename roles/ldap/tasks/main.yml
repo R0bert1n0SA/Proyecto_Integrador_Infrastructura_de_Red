@@ -2,20 +2,23 @@
 # tasks file for Roles/ldap
 #1. Actualizar repositorios y reiniciar
 - name: Actualizar repositorios y paquetes y Reiniciar
-  import_tasks: Actualizar-Reiniciar.yml
+  import_tasks: 01-sistema.yml
 
 # 2. Crear directorio Plantillas
 - name: Crear Carpeta de plantillas
-  import_tasks: CrearDirectorioPlantillas.yml
+  import_tasks: 02-CopiarPlantillas.yml
 
-# 3. DEBCONF SLAPD
+# 3. SLAPD
+- name: Instalar  slapd
+  import_tasks: 03-slapd.yml
+
+# 4. Samba
 - name: Incluir debconf de slapd
-  import_tasks: slapd.yml
+  import_tasks: 04-samba.yml
 
-# 4. Creacion OU, Grupos y Usuarios
+# 5. Creacion OU, Grupos y Usuarios
 - name: Crear  LDAP
-  import_tasks: Crear-Elementos-LDAP.yml
-
+  import_tasks: 05-Crear-Elementos-LDAP.yml
 
 
 

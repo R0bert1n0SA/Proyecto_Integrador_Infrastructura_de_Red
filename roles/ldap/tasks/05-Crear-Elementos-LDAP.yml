@@ -7,12 +7,15 @@
     group: administrador-ldap
 
 - name: Crear las OUs iniciales usando el script
-  script: Crear.sh 3 "{{ item }}"
+  script: Crear.sh 4 "{{ item }}"
   with_items:
     - Users
     - Groups
     - Machines
     - Service
+
+- name: Crear grupos Samba 
+  script: Crear.sh 3 
 
 - name: Crear las Grupos iniciales usando el script
   script: Crear.sh 2 "{{ item }}"
@@ -25,9 +28,14 @@
 
 - name: Crear usuarios masivamente por áreas
   script: Crear.sh 1 "{{ item.area }}" "{{ item.cantidad }}"
+  register: crear_output
   loop:
     - { area: 'QA', cantidad: 3 }
     - { area: 'administracion', cantidad: 5 }
     - { area: 'rr-hh', cantidad: 3 }
     - { area: 'desarrollo', cantidad: 3 }
     - { area: 'soporte', cantidad: 3 }
+
+- name: Mostrar salida del script
+  debug:
+    var: crear_output

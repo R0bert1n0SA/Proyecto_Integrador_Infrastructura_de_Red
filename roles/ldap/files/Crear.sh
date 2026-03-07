@@ -8,7 +8,7 @@ PlantillaU="$dirBase/Plantillas/userPlantilla.ldif"
 PlantillaG="$dirBase/Plantillas/groupPlantilla.ldif"
 PlantillaO="$dirBase/Plantillas/ouPlantilla.ldif"
 array=()
-sambagen=$(sudo net getdomainsid 2>/dev/null | grep "^SID" | awk '{print $7}')
+sambagen=$(sudo net getlocalsid 2>/dev/null | grep "^SID" | awk '{print $6}')
 
 # Recibir argumentos
 opcion=$1
@@ -41,7 +41,7 @@ Validador(){
 Groups(){
     local nombre=$1
     local gid=0
-    array=($(Buscar "ou=Groups" "gidNumber: *" "gidNumber"))
+    array=($(Buscar "ou=Groups" "gidNumber: *" "gidNumber"| awk '$1 >= 2000' | sort  -n))
     Validador 1999 1 2999
     gid=$(( ${array[-1]} + 1 ))
     rid=$(( gid * 2 + 1000 ))
@@ -56,11 +56,40 @@ Groups(){
     rm -f "$TEMP_LDIF"
 }
 
+SambaGroupsEsp(){
+    local sidAdmin="${sambagen}-512"
+    local sidUsers="${sambagen}-513"
+    cat <<EOF >> "$TEMP_LDIF"
+dn: cn=Domain Admins,ou=Groups,dc=luthor,dc=corp
+objectClass: top
+objectClass: posixGroup
+objectClass: sambaGroupMapping
+cn: Domain Admins
+gidNumber: 512
+sambaSID: $sidAdmin
+sambaGroupType: 2
+displayName: Domain Admins
+
+dn: cn=Domain Users,ou=Groups,dc=luthor,dc=corp
+objectClass: top
+objectClass: posixGroup
+objectClass: sambaGroupMapping
+cn: Domain Users
+gidNumber: 513
+sambaSID: $sidUsers
+sambaGroupType: 2
+displayName: Domain Users
+EOF
+
+    ldapadd -x -D "cn=admin,dc=luthor,dc=corp" -w "1234" -f "$TEMP_LDIF"
+    rm -f "$TEMP_LDIF"
+}
+
 Users(){
     local Area=$1
     local Cantidad=$2
     local gid=$(Buscar "ou=Groups" "gidNumber: *" "cn=$Area")
-    array=($(Buscar "ou=Users" "uidNumber: *" "uidNumber" | sort -n))
+    array=($(Buscar "ou=Users" "uidNumber: *" "uidNumber" | awk '$1 >= 3000' | sort  -n))
     Validador 2999 "$Cantidad" 3999
     if [[ -z "$gid" ]]; then
         echo "No existe el grupo"
@@ -91,7 +120,7 @@ SetearValores(){
     local gidN=$Ugid
     local sambaLDS=$(date +%s)
     local sambasid="${sambagen}-${NumberU}"
-    local sambantp=$(echo -n "$UPass" | openssl md4 -binary | xxd -p | tr -d '\n')
+    local sambantp=$(mkntpwd "$UPass")
 
     sed -e "s|{id-user}|$indenU|g" \
         -e "s|{nombre-completo}|$nombreC|g" \
@@ -101,7 +130,7 @@ SetearValores(){
         -e "s|{shell}|$shell|g" \
         -e "s|{mail}|$mail|g" \
         -e "s|{password}|$UPass|g" \
-        -e "s|{number-grupo}|$gidN|g" \
+        -e "s|{grupo-id}|$gidN|g" \
         -e "s|{samba3}|$sambaLDS|g" \
         -e "s|{samba1}|$sambasid|g" \
         -e "s|{samba2}|$sambantp|g" "$PlantillaU" >> "$TEMP_LDIF"
@@ -117,6 +146,9 @@ case "$opcion" in
         Groups "$Input1"
         ;;
     3)
+        SambaGroupsEsp 
+        ;;
+    4)
         sed -e "s/{ou-name}/$Input1/g" "$PlantillaO" >> "$TEMP_LDIF"
         ldapadd -x -D "cn=admin,dc=luthor,dc=corp" -w "1234" -f "$TEMP_LDIF"
         rm -f "$TEMP_LDIF"
