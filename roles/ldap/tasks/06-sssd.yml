@@ -1,5 +1,16 @@
 ---
 # Creás el directorio por las dudas (a veces no existe)
+- name: Instalar SSSD y dependencias
+  apt:
+    name:
+      - sssd
+      - sssd-ldap
+      - sssd-tools
+      - libnss-sss
+      - libpam-sss
+    state: present
+    update_cache: yes
+
 - name: Asegurar que existe el directorio de sssd
   file:
     path: /etc/sssd

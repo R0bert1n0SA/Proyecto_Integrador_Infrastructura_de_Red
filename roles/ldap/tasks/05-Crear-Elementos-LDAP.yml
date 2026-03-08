@@ -25,10 +25,11 @@
     - administracion
     - rr-hh
     - QA
+- name: Crear servicio user
+  script: Crear.sh 5 
 
 - name: Crear usuarios masivamente por áreas
   script: Crear.sh 1 "{{ item.area }}" "{{ item.cantidad }}"
-  register: crear_output
   loop:
     - { area: 'QA', cantidad: 3 }
     - { area: 'administracion', cantidad: 5 }
@@ -36,6 +37,4 @@
     - { area: 'desarrollo', cantidad: 3 }
     - { area: 'soporte', cantidad: 3 }
 
-- name: Mostrar salida del script
-  debug:
-    var: crear_output
+

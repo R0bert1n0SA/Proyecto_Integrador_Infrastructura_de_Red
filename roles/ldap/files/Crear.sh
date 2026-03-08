@@ -22,8 +22,28 @@ Buscar(){
     local param1=$1
     local param2=$2
     local param3=$3
-    ldapsearch -x -D "cn=admin,dc=luthor,dc=corp" -b "$param1,dc=luthor,dc=corp" "$param3" -w  "1234" |grep "$param2" | awk '{print $2}'
+    ldapsearch -x -D "cn=admin,dc=luthor,dc=corp" -b "$param1,dc=luthor,dc=corp" "$param3" -w  "1234" |grep "$param2" | awk '{print $2}' 
 }
+
+UsuarioServ(){
+	local servTemp=$(mktemp --suffix=.ldif)
+	if  (Buscar "ou=Service," "cn=servicioUser" "(cn=servicioUser)"); then
+		rm -f "$servTemp"
+		return 0
+	fi
+	
+	cat <<EOF >> "$servTemp"
+dn: cn=servicioUser,ou=Service,dc=luthor,dc=corp
+objectClass: inetOrgPerson
+cn: servicioUser
+sn: servicio
+userPassword: service
+description: Usuario de servicio para aplicaciones
+EOF
+	ldapadd -x -D "cn=admin,dc=luthor,dc=corp" -w "1234" -f "$servTemp"
+	rm -f "$servTemp"
+}
+
 
 Validador(){
     local valor=$1
@@ -40,10 +60,9 @@ Validador(){
 
 Groups(){
     local nombre=$1
-    local gid=0
-    array=($(Buscar "ou=Groups" "gidNumber: *" "gidNumber"| awk '$1 >= 2000' | sort  -n))
-    Validador 1999 1 2999
-    gid=$(( ${array[-1]} + 1 ))
+    local gid=$(Buscar "ou=Groups" "gidNumber: *" "gidNumber"| awk '$1 >= 2000' | sort  -n |tail -1)
+    gid=${gid:-1999}
+    gid=$(( $gid + 1 ))
     rid=$(( gid * 2 + 1000 ))
     sambaid="${sambagen}-${rid}"
     sed -e "s|{id-grupo}|$nombre|g" \
@@ -86,11 +105,12 @@ EOF
 }
 
 Users(){
-    local Area=$1
+local Area=$1
     local Cantidad=$2
     local gid=$(Buscar "ou=Groups" "gidNumber: *" "cn=$Area")
-    array=($(Buscar "ou=Users" "uidNumber: *" "uidNumber" | awk '$1 >= 3000' | sort  -n))
-    Validador 2999 "$Cantidad" 3999
+    local uidAnt=$(Buscar "ou=Users"  "uidNumber: *"  "uidNumber" | sort  -n | tail -1 )
+     uidAnt=${uidAnt:-2999}
+    Validador "$uidAnt" "$Cantidad" 3999
     if [[ -z "$gid" ]]; then
         echo "No existe el grupo"
         exit 20
@@ -98,10 +118,7 @@ Users(){
     for (( i=0; i<$Cantidad; i++ )); do
         SetearValores "$(( ${array[${#array[@]}-1]} + 1 ))" "$Area" "$gid"
     done
-    echo "$Cantidad usuarios generados para $Area"
-    ldapadd -x -D "cn=admin,dc=luthor,dc=corp"  -w "1234"  -f "$TEMP_LDIF" 
-    
-    # Limpiamos el temporal
+    ldapadd -x -D "cn=admin,dc=luthor,dc=corp" -w "1234" -f "$TEMP_LDIF" 
     rm -f "$TEMP_LDIF"
 }
 
@@ -109,6 +126,7 @@ SetearValores(){
     local ult=$1
     local sect=$2
     local Ugid=$3
+    echo "$ult  i:  $i"
     local indenU="User$sect$i"
     local nombreC="Nomb$sect$i Apell$sect$i"
     local apellido="Apell$sect$i"
@@ -152,6 +170,9 @@ case "$opcion" in
         sed -e "s/{ou-name}/$Input1/g" "$PlantillaO" >> "$TEMP_LDIF"
         ldapadd -x -D "cn=admin,dc=luthor,dc=corp" -w "1234" -f "$TEMP_LDIF"
         rm -f "$TEMP_LDIF"
+        ;;
+    5)
+       UsuarioServ
         ;;
     *)
         echo "Opcion invalida o faltan argumentos"
