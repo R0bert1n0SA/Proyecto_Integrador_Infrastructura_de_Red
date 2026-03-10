@@ -29,7 +29,7 @@
 
 - name: Mostrar resultado de ejecución inicial
   debug:
-    var: resultado_sftp.stdout_lines
+    var: resultado_sftp
 
 - name: Configurar cron para ejecución diaria a las 2 AM
   cron:

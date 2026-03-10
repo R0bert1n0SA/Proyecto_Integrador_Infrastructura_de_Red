@@ -28,8 +28,9 @@ Busqueda_LDAP(){
 # @return: 0 si existe, 32 si no se encuentra
 Existe(){
     local nombre=$1
-    local valor=($(Busqueda_LDAP "cn=$nombre,ou=Groups" "cn"))
-    if [[ -z "$valor" ]]; then
+    local valor=$(Busqueda_LDAP "ou=Groups" "cn=SFTPUsers" | grep "^result:"| awk '{print $2}' )
+    echo "$valor"
+    if [[ "$valor"  -eq  32 ]]; then
         return 32
     else
         return 0
@@ -81,13 +82,13 @@ AgregarUsers(){
     
     if [[ "$exist" == "N" ]]; then
         # Caso: Grupo Nuevo. Filtra base contra baneados.
-        mapfile -t usuarios < <(comm -23 <(printf "%s\n" "${usuariosbase[@]}" | sort -n) <(printf "%s\n" "${baneados[@]}" | sort -n))
+        mapfile -t usuarios < <(comm -23 <(printf "%s\n" "${usuariosbase[@]}" | sort ) <(printf "%s\n" "${baneados[@]}" | sort ))
         Cargar_Miembros
         return 0
     else
         # Caso: Modificación. Compara usuarios deseados vs actuales en LDAP.
         usersGrup=($(Busqueda_LDAP "cn=SFTPUsers,ou=Groups" "memberUid"))
-        mapfile -t final < <(comm -23 <(printf "%s\n" "${usuariosbase[@]}" | sort -n) <(printf "%s\n" "${baneados[@]}" | sort -n))
+        mapfile -t final < <(comm -23 <(printf "%s\n" "${usuariosbase[@]}" | sort ) <(printf "%s\n" "${baneados[@]}" | sort ))
         
         # Si la lista final coincide con la de LDAP, no hay cambios pendientes
         if [[ "${final[*]}" == "${usersGrup[*]}" ]]; then
@@ -95,8 +96,8 @@ AgregarUsers(){
         fi
         
         # Identifica usuarios nuevos y usuarios a eliminar
-        mapfile -t usuarios < <(comm -23 <(printf "%s\n" "${final[@]}" | sort -n) <(printf "%s\n" "${usersGrup[@]}" | sort -n))
-        mapfile -t DeleteUsers < <(comm -23 <(printf "%s\n" "${usersGrup[@]}" | sort -n) <(printf "%s\n" "${final[@]}" | sort -n))
+        mapfile -t usuarios < <(comm -23 <(printf "%s\n" "${final[@]}" | sort ) <(printf "%s\n" "${usersGrup[@]}" | sort ))
+        mapfile -t DeleteUsers < <(comm -23 <(printf "%s\n" "${usersGrup[@]}" | sort -n) <(printf "%s\n" "${final[@]}" | sort ))
         
         Cargar_Miembros
         if [[ "${#DeleteUsers[@]}" != 1 ]]; then
@@ -108,15 +109,16 @@ AgregarUsers(){
 # --- Ejecución Principal (Main) ---
 
 # 1. Obtener lista base de usuarios de la organización
-usuariosbase=($(Busqueda_LDAP "ou=Users" "uid"))
+usuariosbase=($(Busqueda_LDAP "ou=Users" "uid"| grep "^uid:" | awk '{print $2}' | sort ))
 echo -e "dn: cn=SFTPUsers,ou=Groups,dc=luthor,dc=corp" >> "$tempF"
-
 # 2. Determinar si el grupo SFTPUsers debe crearse (ldapadd) o modificarse (ldapmodify)
-if ! Existe "SFTPUsers" ; then
+resultado=$(Existe "SFTPUsers")
+if  [[  "$resultado" -eq  0  ]] ; then
     # Preparar creación de grupo nuevo
     echo -e "objectClass: top\nobjectClass: posixGroup\ncn: SFTPUsers" >> "$tempF"
     Verificar_IDLibre
     AgregarUsers "N"
+    cat  "$tempF"
     /usr/bin/ldapadd -x -D "cn=admin,dc=luthor,dc=corp" -f "$tempF" -w 1234
 else
     # Preparar modificación de grupo existente
