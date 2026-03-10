@@ -25,8 +25,14 @@
     - administracion
     - rr-hh
     - QA
+
 - name: Crear servicio user
   script: Crear.sh 5 
+  register: resultado_servicio
+
+- name: Debug - Mostrar resultado de servicio user
+  debug:
+    var: resultado_servicio
 
 - name: Crear usuarios masivamente por áreas
   script: Crear.sh 1 "{{ item.area }}" "{{ item.cantidad }}"

@@ -1,0 +1,40 @@
+# --- Script de sincronización SFTP ---
+---
+- name: Copiar script de sincronización SFTP
+  copy:
+    src: ActualizarSFTP.sh
+    dest: /usr/local/sbin/ActualizarSFTP.sh
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Copiar archivo de baneados
+  template:
+    src: BannedUsers.txt.j2
+    dest: /var/lib/BannedUsers.txt
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: Crear directorio de logs
+  file:
+    path: /var/log
+    state: directory
+    mode: '0755'
+
+- name: Ejecutar script una vez para crear grupo inicial
+  command:  /usr/local/sbin/ActualizarSFTP.sh
+  register: resultado_sftp
+  changed_when: "'Sin cambios pendientes' not in resultado_sftp.stdout"
+
+- name: Mostrar resultado de ejecución inicial
+  debug:
+    var: resultado_sftp.stdout_lines
+
+- name: Configurar cron para ejecución diaria a las 2 AM
+  cron:
+    name: "Sincronizar SFTPUsers con LDAP"
+    minute: "0"
+    hour: "2"
+    job: "/usr/local/sbin/ActualizarSFTP.sh"
+    user: root

@@ -20,3 +20,6 @@
 
 - name: Instalar sssd
   import_tasks: 07-ModoAnonimo-ACL.yml
+
+- name: Crear Grupo Para SFTP
+  import_tasks: 08-SFTPUsers-Group.yml

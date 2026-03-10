@@ -26,13 +26,12 @@ Buscar(){
 }
 
 UsuarioServ(){
-	local servTemp=$(mktemp --suffix=.ldif)
-	if  (Buscar "ou=Service," "cn=servicioUser" "(cn=servicioUser)"); then
-		rm -f "$servTemp"
-		return 0
+	local flag=$( ldapsearch -x -D "cn=admin,dc=luthor,dc=corp" -b "ou=Service,dc=luthor,dc=corp" "cn=servicioUser" -w  "1234" | grep "dn")
+	if [[  -n "$flag"  ]]; then  		
+		return 0	
 	fi
-	
-	cat <<EOF >> "$servTemp"
+	local servTemp=$(mktemp --suffix=.ldif)
+	cat  <<EOF > "$servTemp"
 dn: cn=servicioUser,ou=Service,dc=luthor,dc=corp
 objectClass: inetOrgPerson
 cn: servicioUser
@@ -176,7 +175,7 @@ case "$opcion" in
         ;;
     *)
         echo "Opcion invalida o faltan argumentos"
-        echo "Uso: $0 {1|2|3} [Nombre/Area] [Cantidad]"
+        echo "Uso: $0 {1|2|3|4|5} [Nombre/Area] [Cantidad]"
         exit 1
         ;;
 esac
