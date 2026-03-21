@@ -1,10 +1,17 @@
 ---
-- name: Configurar Infraestructura Integral
-  hosts: all
-  become: yes 
-
+# PLAY 1: Configurar Servidor LDAP
+- name: Configurar Servidor LDAP
+  hosts: servidor-ldap
+  become: yes
   roles:
-    #- dns
-    #- dhcp
-    - ldap
-    #- sftp-ssh
+    - role: ldap
+      tags: ['ldap']  
+
+# PLAY 2: Configurar Servidor SFTP
+- name: Configurar Servidor SFTP
+  hosts: sftp_server
+  become: yes
+  roles:
+    - role: sftp-ssh
+      tags: ['sftp-ssh'] 
+

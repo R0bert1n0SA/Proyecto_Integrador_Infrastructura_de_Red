@@ -1,0 +1,31 @@
+---
+- name: Crear la raíz de la jaula comunitaria
+  file:
+    path: "{{ sftp_jail_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Crear directorios internos (upload y download)
+  file:
+    path: "{{ sftp_jail_path }}/{{ item }}"
+    state: directory
+    owner: root
+    group: "{{ ldap_sftp_group }}"
+    mode: "{{ '1775' if item == 'upload' else '0755' }}"
+  loop:
+    - upload
+    - download
+
+# 2. Configurar SSHD con el Match Group para la jaula
+- name: Configurar SSHD para Jaula Comunitaria
+  template:
+    src: sshd_config.j2
+    dest: /etc/ssh/sshd_config
+    mode: '0600'
+    validate: '/usr/sbin/sshd -t -f %s' # Valida que la config sea correcta antes de guardar
+    backup: yes
+  notify: Reiniciar SSH
+
+

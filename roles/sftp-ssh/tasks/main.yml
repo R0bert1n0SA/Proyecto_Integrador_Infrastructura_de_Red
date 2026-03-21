@@ -1,2 +1,13 @@
 ---
 # tasks file for Roles/sftp-ssh
+- name: Actualizar repositorios y paquetes y Reiniciar
+  import_tasks: 01-sistema.yml
+
+- name: Instalar NSLCD
+  import_tasks: 02-nslcd.yml
+
+- name: Crear Grupo de administradores SSH
+  import_tasks: 03-Administradores.yml
+
+- name: Crear jaula sftp
+  import_tasks: 04-Chroot.yml

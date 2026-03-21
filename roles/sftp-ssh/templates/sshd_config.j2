@@ -1,0 +1,18 @@
+# /etc/ssh/sshd_config
+
+Port 22
+Protocol 2
+Subsystem sftp internal-sftp
+
+Match Group {{ admin_group }}
+      ForceCommand /bin/bash
+      PermitTTY  no 
+
+Match Group {{ ldap_sftp_group }}
+    ChrootDirectory {{ sftp_jail_path }}
+    AllowTcpForwarding no
+    PasswordAuthentication yes
+    X11Forwarding no
+    PermitTTY  no 
+    PermitTunnel no 
+    ForceCommand internal-sftp

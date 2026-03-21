@@ -1,0 +1,22 @@
+---
+- name: Asegurar que el grupo de administradores locales existe
+  group:
+    name: "{{ admin_group }}"
+    state: present
+    system: yes
+
+- name: Crear usuarios administradores locales
+  user:
+    name: "{{ item }}"
+    groups: "{{ admin_group }}"
+    shell: /bin/bash
+    append: yes
+    state: present
+  loop: "{{ admin_users }}"
+
+- name: Configurar sudoers para el grupo de administradores
+  template:
+    src: sudoers_admins.j2
+    dest: "/etc/sudoers.d/{{ admin_group }}"
+    mode: '0440'
+    validate: 'visudo -cf %s'

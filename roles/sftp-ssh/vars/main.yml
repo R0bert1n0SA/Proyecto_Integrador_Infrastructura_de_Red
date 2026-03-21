@@ -1,2 +1,18 @@
 ---
-# vars file for Roles/sftp-ssh
+# vars file for Roles/ldap
+ldap_domain: "luthor.corp"
+ldap_base_dn: "dc=luthor,dc=corp"
+ldap_organization: "luthor.corp"
+ldap_uri: "ldap://192.168.56.4"
+ansible_hostname: "SFTP_Server"
+ldap_service_user_dn: "cn=servicioUser,ou=Service,dc=luthor,dc=corp"
+ldap_service_user_pass: "service"
+admin_group: "Admins_SSH"
+admin_users:
+  - Admin1
+  - Admin2
+  - Admin3
+  - Admin4
+  - "administrador-sftp"
+sftp_jail_path: "/srv/Chroot"
+ldap_sftp_group: "SFTPUsers"

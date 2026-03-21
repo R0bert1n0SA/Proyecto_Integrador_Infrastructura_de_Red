@@ -1,0 +1,25 @@
+---
+- name: Actualizar repositorios y paquetes (update y upgrade)
+  apt:
+    update_cache: yes
+    upgrade: yes
+    cache_valid_time: 3600
+
+# 2. sudo reboot
+- name: Reiniciar el servidor si es necesario
+  reboot:
+    msg: "Reiniciando por actualización de sistema de Ansible"
+    connect_timeout: 5
+    reboot_timeout: 300
+    pre_reboot_delay: 0
+    post_reboot_delay: 30
+    test_command: uptime
+
+- name: Instalar servidor OpenSSH
+  apt:
+    name: openssh-server
+    state: present
+    update_cache: yes
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+

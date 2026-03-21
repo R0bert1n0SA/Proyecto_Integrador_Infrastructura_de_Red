@@ -1,0 +1,54 @@
+---
+# 1. Pre-configuración de nslcd (Debconf) para que no pida IP por pantalla
+- name: Configurar debconf para nslcd
+  debconf:
+    name: "nslcd"
+    question: "{{ item.question }}"
+    value: "{{ item.value }}"
+    vtype: "{{ item.vtype }}"
+  with_items:
+    - { question: 'nslcd/ldap-uris', value: 'ldap://192.168.58.4', vtype: 'string' }
+    - { question: 'nslcd/ldap-base', value: "{{ ldap_base_dn }}", vtype: 'string' }
+    - { question: 'nslcd/ldap-binddn', value: "{{ ldap_service_user_dn }}", vtype: 'string' }
+    - { question: 'nslcd/ldap-bindpw', value: "{{ ldap_service_user_pass }}", vtype: 'password' }
+
+- name: Configurar debconf para libnss-ldapd
+  debconf:
+    name: "libnss-ldapd"
+    question: "libnss-ldapd/nsswitch"
+    value: "group, passwd, shadow"
+    vtype: "multiselect"
+
+# 2. Instalación de paquetes (sin sssd en la lista)
+- name: Instalar nslcd y dependencias de red
+  apt:
+    name:
+      - nslcd
+      - libnss-ldapd
+      - libpam-ldapd 
+      - nscd
+    state: present
+    update_cache: yes
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+
+
+# 4. Asegurar que nsswitch.conf use ldap
+- name: Configurar nsswitch.conf para usar ldap
+  replace:
+    path: /etc/nsswitch.conf
+    regexp: '^(passwd|group|shadow):(\s+)files(.*)$'
+    replace: '\1:          files ldap'
+
+# 5. Reiniciar y habilitar servicios
+- name: Asegurar que nslcd esté iniciado
+  service:
+    name: nslcd
+    state: restarted
+    enabled: yes
+
+- name: Asegurar que nscd esté iniciado
+  service:
+    name: nscd
+    state: restarted
+    enabled: yes

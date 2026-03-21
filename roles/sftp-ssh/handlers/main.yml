@@ -1,2 +1,6 @@
 ---
 # handlers file for Roles/sftp-ssh
+- name: Reiniciar SSH
+  service:
+    name: ssh
+    state: restarted

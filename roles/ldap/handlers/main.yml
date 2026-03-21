@@ -1,7 +1,7 @@
 ---
- - name: Reiniciar SSSD
+ - name: Reiniciar nslcd
    systemd:
-      name: sssd
+      name: nslcd
       state: restarted
 
  - name: Reiniciar Samba
