@@ -1,73 +1,63 @@
 Vagrant.configure("2") do |config|
-  # Usamos Ubuntu 22.04 (Jammy)
   config.vm.box = "ubuntu/jammy64"
-  
-  # --- MÁQUINA 1: SERVIDOR LDAP ---
-  config.vm.define "servidor-ldap" do |ldap|
-    ldap.vm.network "private_network", ip: "192.168.58.4"
-    ldap.vm.hostname = "ldap-server"
 
-  ldap.vm.provider "virtualbox" do |vb|
-    vb.memory = "2048"
-    vb.cpus = 1
-    vb.name = "Servidor-LDAP"
-  end
+      servers = [
+    {
+      :name => "dns_server",
+      :ip => "192.168.58.2",
+      :hostname => "dns-server",
+      :memory => 2048,
+      :tag => "dns",
+      :user => "administrador-dns"
+    },
+    {
+      :name => "servidor-ldap",
+      :ip => "192.168.58.4",
+      :hostname => "ldap-server",
+      :memory => 2048,
+      :tag => "ldap",
+      :user => "administrador-ldap"
+    },
+    {
+      :name => "sftp_server",
+      :ip => "192.168.58.5",
+      :hostname => "sftp-server",
+      :memory => 1024,
+      :tag => "sftp-ssh",
+      :user => "administrador-sftp"
+    }
+  ]
 
-  # Crear usuario administrador para esta VM
-  ldap.vm.provision "shell", inline: <<-SHELL
-    useradd -m -s /bin/bash administrador-ldap
-    echo "administrador-ldap:1234" |sudo chpasswd
-    sudo usermod -aG sudo administrador-ldap
-    echo "administrador-ldap ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/administrador-ldap
-  SHELL
+  # Bucle para crear cada máquina automáticamente
+  servers.each do |server|
+    config.vm.define server[:name] do |node|
+      node.vm.network "private_network", ip: server[:ip]
+      node.vm.hostname = server[:hostname]
 
-# Ejecutar Ansible SOLO con el tag 'ldap' en esta máquina
-    ldap.vm.provision "ansible" do |ansible|
-      ansible.playbook = "site.yml"
-      # Pasamos la IP de esta misma máquina como servidor LDAP (por si el rol lo necesita)
-      ansible.extra_vars = { 
-        ansible_ssh_common_args: "-o StrictHostKeyChecking=no",
-        ldap_server_ip: "192.168.58.4"
-      }
-      # IMPORTANTE: Asumiendo que en tu site.yml el rol de ldap tiene el tag "ldap"
-      ansible.tags = ["ldap"]
-    end
-  end
+      node.vm.provider "virtualbox" do |vb|
+        vb.memory = server[:memory]
+        vb.cpus = 1
+        vb.name = "Servidor-#{server[:name].capitalize}"
+      end
 
-  # --- MÁQUINA 2: SERVIDOR SFTP (Cliente de LDAP) ---
-  config.vm.define "sftp_server" do |sftp|
-    sftp.vm.network "private_network", ip: "192.168.58.5"
-    sftp.vm.hostname = "sftp-server"
+      # Crear usuario administrador dinámicamente según la máquina
+      node.vm.provision "shell", inline: <<-SHELL
+        useradd -m -s /bin/bash #{server[:user]}
+        echo "#{server[:user]}:1234" | sudo chpasswd
+        sudo usermod -aG sudo #{server[:user]}
+        echo "#{server[:user]} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/#{server[:user]}
+      SHELL
 
-    sftp.vm.provider "virtualbox" do |vb|
-      vb.memory = "1024"
-      vb.cpus = 1
-      vb.name = "Servidor-SFTP"
-    end
-
-    # Crear usuario administrador para esta VM
-    sftp.vm.provision "shell", inline: <<-SHELL
-      useradd -m -s /bin/bash administrador-sftp
-      echo "administrador-sftp:1234" | sudo chpasswd
-      sudo usermod -aG sudo administrador-sftp
-      echo "administrador-sftp ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/administrador-sftp
-    SHELL
-
-    # Ejecutar Ansible SOLO con el tag 'ssh-sftp' en esta máquina
-    sftp.vm.provision "ansible" do |ansible|
-      ansible.playbook = "site.yml"
-      # Le pasamos la IP del SERVIDOR LDAP para que el cliente nslcd se conecte a él
-      ansible.extra_vars = { 
-        ansible_ssh_common_args: "-o StrictHostKeyChecking=no",
-        ldap_server_ip: "192.168.58.4", 
-        # Ajusta esto según tus variables del rol
-        ldap_base_dn: "dc=luthor,dc=corp" 
-      }
-      # IMPORTANTE: Asumiendo que en tu site.yml el rol de ssh-sftp tiene el tag "sftp-ssh"
-      ansible.tags = ["sftp-ssh"]
+      # Ejecutar Ansible con el tag correspondiente
+      node.vm.provision "ansible" do |ansible|
+        ansible.playbook = "site.yml"
+        ansible.extra_vars = { 
+          ansible_ssh_common_args: "-o StrictHostKeyChecking=no",
+          ldap_server_ip: server[:name] == "dns_server" ? server[:ip] : "192.168.58.4",
+          ldap_base_dn: "dc=luthor,dc=corp" 
+        }
+        ansible.tags = [server[:tag]]
+      end
     end
   end
 end
-
-
-

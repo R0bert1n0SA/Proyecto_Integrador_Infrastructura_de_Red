@@ -15,3 +15,10 @@
     - role: sftp-ssh
       tags: ['sftp-ssh'] 
 
+# PLAY 3: Configurar Servidor DNS
+- name: Configurar Servidor DNS
+  hosts: dns_server
+  become: yes
+  roles:
+    - role: dns
+      tags: ['dns'] 

@@ -1,0 +1,13 @@
+// include "/etc/bind/zones.rfc1918";
+
+// --- ZONA DIRECTA ---
+zone "{{ dns_domain }}" {
+    type master;                                      
+    file "/etc/bind/zones/db.{{ dns_domain }}"; 
+};
+
+// --- ZONA INVERSA ---
+zone "58.168.192.in-addr.arpa" {
+    type master;                                     
+    file "/etc/bind/zones/db.58.168.192";          
+};

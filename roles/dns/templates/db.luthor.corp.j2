@@ -1,0 +1,19 @@
+; BIND data file for {{ dns_domain }}
+
+$TTL    604800
+
+; --- SOA (Start Of Authority) ---
+@       IN      SOA     ns.{{ dns_domain }}. admin.{{ dns_domain }}. (
+                              2         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+
+; --- NS (Name Server) ---
+@       IN      NS      ns.{{ dns_domain }}.
+
+; --- Registros A (Address) ---
+{% for host in dns_hosts %}
+{{ host.name }}         IN      A       {{ host.ip }}
+{% endfor %}

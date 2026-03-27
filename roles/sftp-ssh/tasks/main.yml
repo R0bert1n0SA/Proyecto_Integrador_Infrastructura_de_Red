@@ -1,7 +1,7 @@
 ---
 # tasks file for Roles/sftp-ssh
 - name: Actualizar repositorios y paquetes y Reiniciar
-  import_tasks: 01-sistema.yml
+  import_tasks:  ../../TareasComunes/01-sistema.yml
 
 - name: Instalar NSLCD
   import_tasks: 02-nslcd.yml

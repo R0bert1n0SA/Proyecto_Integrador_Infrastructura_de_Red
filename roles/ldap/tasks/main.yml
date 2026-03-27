@@ -1,7 +1,7 @@
 ---
 # tasks file for Roles/ldap
 - name: Actualizar repositorios y paquetes y Reiniciar
-  import_tasks: 01-sistema.yml
+  import_tasks: ../../TareasComunes/01-sistema.yml
 
 - name: Crear Carpeta de plantillas
   import_tasks: 02-CopiarPlantillas.yml
