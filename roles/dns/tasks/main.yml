@@ -5,3 +5,6 @@
 
 - name: Actualizar repositorios y paquetes y Reiniciar
   import_tasks: 02-InstalarDependencias.yml
+
+- name: Generar y guardar clave TSIG
+  import_tasks: 03-GenerarTSIG.yml

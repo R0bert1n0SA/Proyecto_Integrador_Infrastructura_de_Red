@@ -1,2 +1,6 @@
 ---
 # handlers file for Roles/dhcp
+- name: Reiniciar DHCP
+  service:
+    name: isc-dhcp-server
+    state: restarted

@@ -1,0 +1,10 @@
+---
+- name: Leer clave TSIG desde el servidor DNS
+  ansible.builtin.slurp:
+    src: /etc/bind/dhcp-update-key.key
+  delegate_to: dns_server
+  register: tsig_key_file
+
+- name: Extraer el secret
+  ansible.builtin.set_fact:
+    tsig_secret: "{{ tsig_key_file.content | b64decode | regex_search('secret \"(.+)\"', '\\1') | first }}"

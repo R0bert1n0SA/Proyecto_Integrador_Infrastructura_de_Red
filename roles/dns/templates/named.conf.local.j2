@@ -1,13 +1,18 @@
 // include "/etc/bind/zones.rfc1918";
-
+key "dhcp-update-key" {
+    algorithm hmac-sha256;
+    secret "{{ dhcp_tsig_secret }}";
+};
 // --- ZONA DIRECTA ---
 zone "{{ dns_domain }}" {
     type master;                                      
     file "/etc/bind/zones/db.{{ dns_domain }}"; 
+   allow-update { key "dhcp-update-key"; };
 };
 
 // --- ZONA INVERSA ---
 zone "58.168.192.in-addr.arpa" {
     type master;                                     
-    file "/etc/bind/zones/db.58.168.192";          
+    file "/etc/bind/zones/db.58.168.192";  
+   allow-update { key "dhcp-update-key"; };        
 };

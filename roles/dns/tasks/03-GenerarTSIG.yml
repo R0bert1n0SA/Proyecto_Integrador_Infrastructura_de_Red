@@ -1,0 +1,14 @@
+---
+- name: Generar clave TSIG
+  ansible.builtin.command:
+    cmd: tsig-keygen -a hmac-sha256 dhcp-update-key
+  register: tsig_output
+  changed_when: true
+
+- name: Guardar clave en archivo
+  ansible.builtin.copy:
+    content: "{{ tsig_output.stdout }}"
+    dest: /etc/bind/dhcp-update-key.key
+    owner: bind
+    group: bind
+    mode: '0640'

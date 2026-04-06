@@ -1,5 +1,22 @@
 ---
-# PLAY 1: Configurar Servidor LDAP
+# PLAY 1: Configurar Servidor DNS
+- name: Configurar Servidor DNS
+  hosts: dns_server
+  become: yes
+  roles:
+    - role: dns
+      tags: ['dns'] 
+
+# PLAY 2: Configurar Servidor DNS
+- name: Configurar Servidor DHCP
+  hosts: servidor-dhcp
+  become: yes
+  roles:
+    - role: dhcp
+      tags: ['dhcp'] 
+
+
+# PLAY 3: Configurar Servidor LDAP
 - name: Configurar Servidor LDAP
   hosts: servidor-ldap
   become: yes
@@ -7,7 +24,7 @@
     - role: ldap
       tags: ['ldap']  
 
-# PLAY 2: Configurar Servidor SFTP
+# PLAY 4: Configurar Servidor SFTP
 - name: Configurar Servidor SFTP
   hosts: sftp_server
   become: yes
@@ -15,10 +32,4 @@
     - role: sftp-ssh
       tags: ['sftp-ssh'] 
 
-# PLAY 3: Configurar Servidor DNS
-- name: Configurar Servidor DNS
-  hosts: dns_server
-  become: yes
-  roles:
-    - role: dns
-      tags: ['dns'] 
+

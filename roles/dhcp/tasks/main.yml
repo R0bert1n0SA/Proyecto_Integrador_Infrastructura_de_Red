@@ -1,2 +1,10 @@
 ---
-# tasks file for Roles/dhcp
+# tasks file for Roles/ldap
+- name: Actualizar repositorios y paquetes y Reiniciar
+  import_tasks: ../../TareasComunes/01-sistema.yml
+
+- name: Instalar Dependencias
+  import_tasks: 02-Instalar-DHCP.yml
+
+- name: Obtener clave TSIG del DNS
+  import_tasks: 03-ObtenerTSIG.yml

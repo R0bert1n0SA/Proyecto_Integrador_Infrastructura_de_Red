@@ -2,28 +2,33 @@ Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/jammy64"
 
       servers = [
-    {
+      {
       :name => "dns_server",
       :ip => "192.168.58.2",
       :hostname => "dns-server",
-      :memory => 2048,
+      :memory => 1024,
       :tag => "dns",
       :user => "administrador-dns"
+    },{
+      :name => "servidor-dhcp",
+      :ip => "192.168.58.3",
+      :hostname => "dhcp-server",
+      :memory => 1024,
+      :tag => "dhcp",
+      :user => "administrador-dhcp"
     },
     {
       :name => "servidor-ldap",
-      :ip => "192.168.58.4",
       :hostname => "ldap-server",
-      :memory => 2048,
+      :memory => 1024,
       :tag => "ldap",
       :user => "administrador-ldap"
     },
     {
       :name => "sftp_server",
-      :ip => "192.168.58.5",
       :hostname => "sftp-server",
       :memory => 1024,
-      :tag => "sftp-ssh",
+      :tag => "ldap",
       :user => "administrador-sftp"
     }
   ]
@@ -31,13 +36,17 @@ Vagrant.configure("2") do |config|
   # Bucle para crear cada máquina automáticamente
   servers.each do |server|
     config.vm.define server[:name] do |node|
-      node.vm.network "private_network", ip: server[:ip]
+         if server[:ip]
+  		node.vm.network "private_network", ip: server[:ip]
+	else
+  		node.vm.network "private_network", type: "dhcp"
+	end
       node.vm.hostname = server[:hostname]
 
       node.vm.provider "virtualbox" do |vb|
         vb.memory = server[:memory]
         vb.cpus = 1
-        vb.name = "Servidor-#{server[:name].capitalize}"
+        vb.name = "#{server[:name].capitalize}"
       end
 
       # Crear usuario administrador dinámicamente según la máquina
