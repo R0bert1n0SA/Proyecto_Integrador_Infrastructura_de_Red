@@ -72,7 +72,7 @@
     group: root
     mode: '0644'
     content: |
-      nameserver "127.0.0.1"
+      nameserver 127.0.0.1
       search {{ dns_domain }}
 
 # Asegurar que nsswitch use DNS

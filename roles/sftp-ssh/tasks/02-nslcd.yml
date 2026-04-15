@@ -1,5 +1,25 @@
 ---
-# 1. Pre-configuración de nslcd (Debconf) para que no pida IP por pantalla
+- name: Deshabilitar systemd-resolved
+  service:
+    name: systemd-resolved
+    state: stopped
+    enabled: no
+
+- name: Eliminar symlink de resolv.conf
+  file:
+    path: /etc/resolv.conf
+    state: absent
+
+- name: Configurar resolv.conf para usar DNS propio
+  copy:
+    dest: /etc/resolv.conf
+    content: |
+      nameserver 192.168.58.2
+      search luthor.corp
+    owner: root
+    group: root
+    mode: '0644'
+
 - name: Configurar debconf para nslcd
   debconf:
     name: "nslcd"
@@ -7,7 +27,7 @@
     value: "{{ item.value }}"
     vtype: "{{ item.vtype }}"
   with_items:
-    - { question: 'nslcd/ldap-uris', value: 'ldap://192.168.58.4', vtype: 'string' }
+    - { question: 'nslcd/ldap-uris', value: 'ldap://auth.luthor.corp', vtype: 'string' }
     - { question: 'nslcd/ldap-base', value: "{{ ldap_base_dn }}", vtype: 'string' }
     - { question: 'nslcd/ldap-binddn', value: "{{ ldap_service_user_dn }}", vtype: 'string' }
     - { question: 'nslcd/ldap-bindpw', value: "{{ ldap_service_user_pass }}", vtype: 'password' }

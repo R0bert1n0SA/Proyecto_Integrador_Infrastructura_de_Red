@@ -1,26 +1,25 @@
 ---
 # vars file for Roles/dhcp
-dhcp_interface: "enp0s3"
+dhcp_interface: "enp0s8"
 dhcp_domain_name: "luthor.corp"
-dhcp_domain_name_servers: "192.168.58.5"
+dhcp_domain_name_servers: "192.168.58.2"
 dhcp_default_lease_time: 600
 dhcp_max_lease_time: 7200
 dhcp_subnet: "192.168.58.0"
 dhcp_netmask: "255.255.255.0"
-dhcp_range_start: "192.168.58.2"
+dhcp_range_start: "192.168.58.4"
 dhcp_range_end: "192.168.58.254"
 dhcp_routers: "192.168.58.1"
 dhcp_broadcast: "192.168.58.255"
 dhcp_reservations:
   - name: "servidor-ldap"
-    mac: "AA:BB:CC:DD:EE:01"
+    mac: "08:00:27:2f:83:5c"
     hostname: "auth"
   - name: "servidor-sftp"
-    mac: "AA:BB:CC:DD:EE:02"
+    mac: "08:00:27:81:a5:87"
     hostname: "sftp"
  
 dhcp_tsig_key_name: "dhcp-update-key"
-dhcp_tsig_algorithm: "hmac-sha256"
-dhcp_tsig_secret: ""        
-dhcp_ddns_enabled: false    
-dhcp_dns_server_ip: "192.168.58.5"
+dhcp_tsig_algorithm: "hmac-sha256"      
+dhcp_ddns_enabled: true    
+dhcp_dns_server_ip: "192.168.58.2"
