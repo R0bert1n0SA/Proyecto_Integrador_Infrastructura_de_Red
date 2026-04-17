@@ -33,6 +33,14 @@ Vagrant.configure("2") do |config|
       :tag => "sftp-ssh",
       :user => "administrador-sftp",
       :mac => "08002781a587"
+    },
+    {
+      :name => "cliente",
+      :hostname => "cliente-gui",
+      :memory => 4096,          # GUI necesita más RAM
+      :cpus => 1,               # GUI necesita más CPU
+      :tag => "cliente",
+      :user => "administrador-cliente",
     }
   ]
  
@@ -51,9 +59,17 @@ Vagrant.configure("2") do |config|
  
       node.vm.provider "virtualbox" do |vb|
         vb.memory = server[:memory]
-        vb.cpus = 1
+        vb.cpus = server[:cpus] || 1
         vb.name = "#{server[:name].capitalize}"
         vb.customize ["modifyvm", :id, "--macaddress2", server[:mac]] if server[:mac]
+ 
+        # Habilitar GUI solo para el cliente
+        if server[:name] == "cliente"
+          vb.gui = true
+          vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
+          vb.customize ["modifyvm", :id, "--vram", "128"]
+          vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
+        end
       end
  
       node.vm.provision "shell", inline: <<-SHELL

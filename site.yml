@@ -32,4 +32,10 @@
     - role: sftp-ssh
       tags: ['sftp-ssh'] 
 
-
+# PLAY 5: Configurar Cliente con GUI (obtiene IP por DHCP, DNS de la red)
+- name: Configurar Cliente GUI
+  hosts: cliente
+  become: yes
+  roles:
+    - role: cliente
+      tags: ['cliente']
