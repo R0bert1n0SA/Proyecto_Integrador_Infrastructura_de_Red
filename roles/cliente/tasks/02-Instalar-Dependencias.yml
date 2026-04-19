@@ -28,6 +28,7 @@
       - libpam-ldapd
       - ldap-utils 
       - nscd
+      - openssh-client
     state: present
     update_cache: yes
   environment:

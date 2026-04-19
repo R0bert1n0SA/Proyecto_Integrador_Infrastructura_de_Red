@@ -1,5 +1,4 @@
 Vagrant.configure("2") do |config|
-  config.vm.box = "ubuntu/jammy64"
  
   servers = [
     {
@@ -36,49 +35,43 @@ Vagrant.configure("2") do |config|
     },
     {
       :name => "cliente",
-      :hostname => "cliente-gui",
-      :memory => 4096,          # GUI necesita más RAM
-      :cpus => 1,               # GUI necesita más CPU
+      :hostname => "cliente",
+      :memory => 4096,
+      :cpus => 1,
       :tag => "cliente",
       :user => "administrador-cliente",
+      :box => "ubuntu/bionic64"
     }
   ]
  
   servers.each do |server|
     config.vm.define server[:name] do |node|
- 
-     if server[:ip]
-         node.vm.network "private_network", ip: server[:ip],
-         virtualbox__intnet: "red-interna"
+     node.vm.box = server[:box] || "ubuntu/jammy64"
+
+      if server[:ip]
+        node.vm.network "private_network", ip: server[:ip],
+          virtualbox__intnet: "red-interna"
       else
-         node.vm.network "private_network", type: "dhcp",
-         virtualbox__intnet: "red-interna"
+        node.vm.network "private_network", type: "dhcp",
+          virtualbox__intnet: "red-interna"
       end
- 
+
       node.vm.hostname = server[:hostname]
- 
+
       node.vm.provider "virtualbox" do |vb|
         vb.memory = server[:memory]
         vb.cpus = server[:cpus] || 1
         vb.name = "#{server[:name].capitalize}"
         vb.customize ["modifyvm", :id, "--macaddress2", server[:mac]] if server[:mac]
- 
-        # Habilitar GUI solo para el cliente
-        if server[:name] == "cliente"
-          vb.gui = true
-          vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
-          vb.customize ["modifyvm", :id, "--vram", "128"]
-          vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
-        end
-      end
- 
-      node.vm.provision "shell", inline: <<-SHELL
+       end
+
+      node.vm.provision "shell", name: "crear-usuario", inline: <<-SHELL
         useradd -m -s /bin/bash #{server[:user]}
-        echo "#{server[:user]}:1234" | sudo chpasswd
-        sudo usermod -aG sudo #{server[:user]}
+        echo "#{server[:user]}:1234" | chpasswd
+        usermod -aG sudo #{server[:user]}
         echo "#{server[:user]} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/#{server[:user]}
       SHELL
- 
+
       node.vm.provision "ansible" do |ansible|
         ansible.playbook = "site.yml"
         ansible.extra_vars = {
