@@ -55,6 +55,11 @@
     state: restarted
     enabled: yes
 
+- name: Habilitar autenticación PAM con LDAP
+  command: pam-auth-update --enable ldap --force
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+
 - name: Asegurar creación de directorios home al loguearse
   lineinfile:
     path: /etc/pam.d/common-session

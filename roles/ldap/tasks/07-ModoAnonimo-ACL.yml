@@ -17,8 +17,9 @@
       dn: olcDatabase={1}mdb,cn=config
       changetype: modify
       add: olcAccess
-      olcAccess: {0}to attrs=userPassword by self write by anonymous auth by dn="cn=admin,{{ ldap_base_dn }}" write by * none
-      olcAccess: {1}to * by dn="cn=servicioUser,ou=Service,{{ ldap_base_dn }}" read by dn="cn=admin,{{ ldap_base_dn }}" write by * none
+              olcAccess: {0}to attrs=userPassword by self write by anonymous auth by dn="cn=servicioUser,ou=Service,{{ ldap_base_dn }}" auth by dn="cn=admin,{{ ldap_base_dn }}" write by * none
+             olcAccess: {1}to * by dn="cn=servicioUser,ou=Service,{{ ldap_base_dn }}" read by dn="cn=admin,{{ ldap_base_dn }}" write by * none
+
 
 # 2. Aplicamos el cambio al árbol de configuración (cn=config)
 - name: Aplicar desactivación de modo anónimo y ACLs

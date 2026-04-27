@@ -137,8 +137,8 @@ SetearValores(){
     local gidN=$Ugid
     local sambaLDS=$(date +%s)
     local sambasid="${sambagen}-${NumberU}"
-    local sambantp=$(mkntpwd "$UPass")
-
+    local sambantp=$(python3 -c "import hashlib; print(hashlib.new('md4', '${UPass}'.encode('utf-16-le')).hexdigest().upper())")
+    local UPassHash=$(slappasswd -s "$UPass")
     sed -e "s|{id-user}|$indenU|g" \
         -e "s|{nombre-completo}|$nombreC|g" \
         -e "s|{apellido}|$apellido|g" \
@@ -146,7 +146,7 @@ SetearValores(){
         -e "s|{home}|$home|g" \
         -e "s|{shell}|$shell|g" \
         -e "s|{mail}|$mail|g" \
-        -e "s|{password}|$UPass|g" \
+        -e "s|{password}|$UPassHash|g" \
         -e "s|{grupo-id}|$gidN|g" \
         -e "s|{samba3}|$sambaLDS|g" \
         -e "s|{samba1}|$sambasid|g" \

@@ -3,6 +3,7 @@
 Port 22
 Protocol 2
 Subsystem sftp internal-sftp
+PasswordAuthentication yes
 
 Match Group {{ admin_group }}
       ForceCommand /bin/bash
@@ -11,7 +12,6 @@ Match Group {{ admin_group }}
 Match Group {{ ldap_sftp_group }}
     ChrootDirectory {{ sftp_jail_path }}
     AllowTcpForwarding no
-    PasswordAuthentication yes
     X11Forwarding no
     PermitTTY  no 
     PermitTunnel no 
