@@ -1,0 +1,29 @@
+---
+- name: Copiar common-auth desde template
+  template:
+    src: common-auth.j2
+    dest: /etc/pam.d/common-auth
+    owner: root
+    group: root
+    mode: '0644'
+ 
+- name: Copiar common-account desde template
+  template:
+    src: common-account.j2
+    dest: /etc/pam.d/common-account
+    owner: root
+    group: root
+    mode: '0644'
+ 
+- name: Copiar common-session desde template
+  template:
+    src: common-session.j2
+    dest: /etc/pam.d/common-session
+    owner: root
+    group: root
+    mode: '0644'
+ 
+- name: Ejecutar pam-auth-update para consolidar configuración
+  command: pam-auth-update --enable ldap --force
+  environment:
+    DEBIAN_FRONTEND: noninteractive

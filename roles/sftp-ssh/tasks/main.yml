@@ -6,8 +6,11 @@
 - name: Instalar NSLCD
   import_tasks: 02-nslcd.yml
 
+- name: ConfigurarPAM
+  import_tasks: 03-Pam-config.yml
+
 - name: Crear Grupo de administradores SSH
-  import_tasks: 03-Administradores.yml
+  import_tasks: 04-Administradores.yml
 
 - name: Crear jaula sftp
-  import_tasks: 04-Chroot.yml
+  import_tasks: 05-Chroot.yml
