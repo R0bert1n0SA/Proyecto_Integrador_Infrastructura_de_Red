@@ -3,7 +3,7 @@
 ldap_domain: "luthor.corp"
 ldap_base_dn: "dc=luthor,dc=corp"
 ldap_organization: "luthor.corp"
-ldap_uri: "ldap://192.168.56.4"
+ldap_uri: "ldap://auth.luthor.corp"
 ansible_hostname: "SFTP_Server"
 ldap_service_user_dn: "cn=servicioUser,ou=Service,dc=luthor,dc=corp"
 ldap_service_user_pass: "service"

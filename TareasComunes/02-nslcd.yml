@@ -1,25 +1,4 @@
 ---
-- name: Deshabilitar systemd-resolved
-  service:
-    name: systemd-resolved
-    state: stopped
-    enabled: no
-
-- name: Eliminar symlink de resolv.conf
-  file:
-    path: /etc/resolv.conf
-    state: absent
-
-- name: Configurar resolv.conf para usar DNS propio
-  copy:
-    dest: /etc/resolv.conf
-    content: |
-      nameserver 192.168.58.2
-      search luthor.corp
-    owner: root
-    group: root
-    mode: '0644'
-
 - name: Configurar debconf para nslcd
   debconf:
     name: "nslcd"
@@ -27,7 +6,7 @@
     value: "{{ item.value }}"
     vtype: "{{ item.vtype }}"
   with_items:
-    - { question: 'nslcd/ldap-uris', value: 'ldap://auth.luthor.corp', vtype: 'string' }
+    - { question: 'nslcd/ldap-uris', value: "{{ ldap_uri }}", vtype: 'string' }
     - { question: 'nslcd/ldap-base', value: "{{ ldap_base_dn }}", vtype: 'string' }
     - { question: 'nslcd/ldap-binddn', value: "{{ ldap_service_user_dn }}", vtype: 'string' }
     - { question: 'nslcd/ldap-bindpw', value: "{{ ldap_service_user_pass }}", vtype: 'password' }
@@ -39,35 +18,31 @@
     value: "group, passwd, shadow"
     vtype: "multiselect"
 
-# 2. Instalación de paquetes (sin sssd en la lista)
-- name: Instalar nslcd y dependencias de red
+- name: Instalar nslcd y dependencias
   apt:
     name:
       - nslcd
       - libnss-ldapd
-      - libpam-ldapd 
+      - libpam-ldapd
       - nscd
     state: present
     update_cache: yes
   environment:
     DEBIAN_FRONTEND: noninteractive
 
-
-# 4. Asegurar que nsswitch.conf use ldap
 - name: Configurar nsswitch.conf para usar ldap
   replace:
     path: /etc/nsswitch.conf
     regexp: '^(passwd|group|shadow):(\s+)files(.*)$'
     replace: '\1:          files ldap'
 
-# 5. Reiniciar y habilitar servicios
-- name: Asegurar que nslcd esté iniciado
+- name: Reiniciar nslcd
   service:
     name: nslcd
     state: restarted
     enabled: yes
 
-- name: Asegurar que nscd esté iniciado
+- name: Reiniciar nscd
   service:
     name: nscd
     state: restarted

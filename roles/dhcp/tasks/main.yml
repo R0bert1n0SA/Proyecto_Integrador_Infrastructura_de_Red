@@ -4,8 +4,8 @@
   import_tasks: ../../TareasComunes/01-sistema.yml
 
 - name: Obtener clave TSIG del DNS
-  import_tasks: 03-ObtenerTSIG.yml
+  import_tasks: 02-ObtenerTSIG.yml
 
 - name: Instalar Dependencias
-  import_tasks: 02-Instalar-DHCP.yml
+  import_tasks: 03-Instalar-DHCP.yml
 

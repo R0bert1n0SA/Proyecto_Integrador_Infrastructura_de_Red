@@ -4,4 +4,7 @@
   import_tasks: ../../TareasComunes/01-sistema.yml
 
 - name: Instalar Dependencias
-  import_tasks: 02-Instalar-Dependencias.yml
+  import_tasks: ../../TareasComunes/02-nslcd.yml
+
+- name: Instalar Dependencias
+  import_tasks: 03-Config-PAM.yml

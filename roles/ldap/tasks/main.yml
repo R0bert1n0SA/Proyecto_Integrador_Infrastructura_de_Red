@@ -16,7 +16,7 @@
   import_tasks: 05-Crear-Elementos-LDAP.yml
 
 - name: Instalar nslcd
-  import_tasks: 06-nslcd.yml
+  import_tasks: ../../TareasComunes/02-nslcd.yml
 
 - name: Instalar sssd
   import_tasks: 07-ModoAnonimo-ACL.yml

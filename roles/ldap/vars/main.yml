@@ -4,13 +4,13 @@ ldap_domain: "luthor.corp"
 ldap_base_dn: "dc=luthor,dc=corp"
 ldap_admin_pass: "1234"
 ldap_organization: "luthor.corp"
-ldap_uri: "ldap://auth.luthor.corp"
+ldap_uri: "ldap://127.0.0.1"
 ldap_BDB: "MDB"
 samba_workgroup: "luthor"
 ansible_hostname: "Ldap_Server"
-ldap_service_user_dn: "cn=serviceU,dc=luthor,dc=corp"
+ldap_service_user_dn: "cn=servicioUser,ou=Service,dc=luthor,dc=corp"
 ldap_admin_dn: "cn=admin,dc=luthor,dc=corp"
-
+ldap_service_user_pass: "service"
 ldap_packages:
   - slapd
   - ldap-utils

@@ -139,31 +139,105 @@ Proyecto_Integrador_Infrastructura_de_Red/
 ├── Vagrantfile
 ├── site.yml
 ├── Inventary.ini
+├── README.md                          
+├── Readme/
+│   ├── README_es.md
+│   ├── README_en.md
+│   ├── README_de.md
+│   └── README_is.md
 ├── TareasComunes/
-│   └── 01-sistema.yml
-└── Roles/
+│   ├── 01-sistema.yml
+│   └── 02-nslcd.yml
+└── roles/
     ├── dns/
+    │   ├── defaults/
+    │   ├── files/
+    │   ├── handlers/
+    │   ├── meta/
     │   ├── tasks/
+    │   │  ├── main.yml
+    │   │  ├── 02-InstalarDependencias.yml
+    │   │  └── 03-GenerarTSIG.yml
     │   ├── templates/
-    │   │   ├── named_conf_options.j2
-    │   │   ├── named_conf_local.j2
-    │   │   ├── db_luthor_corp.j2
-    │   │   └── db_58_168_192.j2
+    │   │   ├── named.conf.options.j2
+    │   │   ├── named.conf.local.j2
+    │   │   ├── db.luthor.corp.j2
+    │   │   └── db.58.168.192.j2
+    │   ├── tests/
     │   └── vars/
+    │       └── main.yml
     ├── dhcp/
+    │   ├── defaults/
+    │   ├── files/
+    │   ├── handlers/
+    │   ├── meta/
     │   ├── tasks/
+    │   │  ├── main.yml
+    │   │  ├── 02-ObtenerTSIG.yml
+    │   │  └── 03-Instalar-DHCP.yml
     │   ├── templates/
     │   │   ├── dhcpd_conf.j2
     │   │   └── isc-dhcp-server.j2
+    │   ├── tests/
     │   └── vars/
+    │         └── main.yml
     ├── ldap/
+    │   ├── defaults/
+    │   ├── files/
+    │   │   ├── Crear.sh
+    │   │   ├── ActualizarSFTP.sh
+    │   │   └── userPlantilla.ldif
+    │   │   └── groupPlantilla.ldif
+    │   │   └── ouPlantilla.ldif
+    │   ├── handlers/
+    │   │  ├── main.yml
+    │   ├── meta/
     │   ├── tasks/
+    │   │   ├── main.yml
+    │   │   ├── 02-CopiarPlantillas.yml
+    │   │   ├── 03-slapd.yml
+    │   │   ├── 04-samba.yml
+    │   │   ├── 05-Crear-Elementos-LDAP.yml
+    │   │   ├── 07-ModoAnonimo-ACL.yml
+    │   │   └── 08-SFTPUsers-Group.yml
     │   ├── templates/
+    │   │   ├── smb.conf.j2
+    │   │   └── BannedUsers.txt.j2
+    │   ├── tests/
     │   └── vars/
-    └── sftp-ssh/
+    │	       └── main.yml
+    ├── sftp-ssh/
+    │   ├── defaults/
+    │   ├── files/
+    │   ├── handlers/
+    │   ├── meta/
+    │   ├── tasks/
+    │   │   ├── main.yml
+    │   │   ├── 02-resolv-config.yml
+    │   │   ├── 03-Pam-config.yml
+    │   │   ├── 04-Administradores.yml
+    │   │   └── 05-Chroot.yml
+    │   ├── templates/
+    │   │   ├── sshd_config.j2
+    │   │   ├── sudoers_admins.j2
+    │   │   ├── common-auth.j2
+    │   │   ├── common-account.j2
+    │   │   └── common-session.j2
+    │   ├── tests/
+    │   └── vars/
+    │       └── main.yml
+    └── cliente/
+        ├── defaults/
+        ├── files/
+        ├── handlers/
+        ├── meta/
         ├── tasks/
+        │   ├── main.yml
+        │   └── 03-Config-PAM.yml
         ├── templates/
+        ├── tests/
         └── vars/
+             └── main.yml
 ```
 
 ---

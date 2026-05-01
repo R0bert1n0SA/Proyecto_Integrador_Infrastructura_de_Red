@@ -1,0 +1,20 @@
+- name: Deshabilitar systemd-resolved
+  service:
+    name: systemd-resolved
+    state: stopped
+    enabled: no
+
+- name: Eliminar symlink de resolv.conf
+  file:
+    path: /etc/resolv.conf
+    state: absent
+
+- name: Configurar resolv.conf para usar DNS propio
+  copy:
+    dest: /etc/resolv.conf
+    content: |
+      nameserver 192.168.58.2
+      search luthor.corp
+    owner: root
+    group: root
+    mode: '0644'

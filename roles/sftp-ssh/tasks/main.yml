@@ -3,8 +3,11 @@
 - name: Actualizar repositorios y paquetes y Reiniciar
   import_tasks:  ../../TareasComunes/01-sistema.yml
 
+- name: resolv.config
+  import_tasks: 02-resolv-config.yml
+
 - name: Instalar NSLCD
-  import_tasks: 02-nslcd.yml
+  import_tasks: ../../TareasComunes/02-nslcd.yml
 
 - name: ConfigurarPAM
   import_tasks: 03-Pam-config.yml
