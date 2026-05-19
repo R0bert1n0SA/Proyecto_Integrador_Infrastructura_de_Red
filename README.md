@@ -1,4 +1,4 @@
-# **🌎 Bienvenido / Welcome / Velkominn / Willkommen**
+# **🌎 Bienvenido / **🌎 Welcome /**🌎 Velkominn / **🌎 Willkommen**
 <div align="center">
 
 **Selecciona tu idioma para ver la documentación*.<br>Select your language to view the documentation.<br>Veldu tungumál til að skoða skjölun.<br>Wählen Sie Ihre Sprache aus, um die Dokumentation anzuzeigen.*
