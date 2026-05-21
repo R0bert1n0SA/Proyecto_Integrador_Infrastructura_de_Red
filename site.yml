@@ -39,3 +39,11 @@
   roles:
     - role: cliente
       tags: ['cliente']
+
+# PLAY 6: Configurar monitoreo  
+- name: Configurar monitoreo server
+  hosts: Monitoring-Server
+  become: yes
+  roles:
+    - role: monitoring-server
+      tags: ['monitoring']

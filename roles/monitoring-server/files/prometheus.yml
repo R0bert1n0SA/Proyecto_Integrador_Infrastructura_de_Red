@@ -1,0 +1,33 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'alertmanager:9093'
+
+rule_files:
+  - "alerts.yml"
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'dns-server'
+    static_configs:
+      - targets: ['ns.luthor.corp:9100']
+
+  - job_name: 'dhcp-server'
+    static_configs:
+      - targets: ['192.168.58.3:9100']
+
+  - job_name: 'ldap-server'
+    static_configs:
+      - targets: ['auth.luthor.corp:9100']
+
+  - job_name: 'sftp-server'
+    static_configs:
+      - targets: ['sftp.luthor.corp:9100']

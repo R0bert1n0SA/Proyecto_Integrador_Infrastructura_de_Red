@@ -41,7 +41,15 @@ Vagrant.configure("2") do |config|
       :tag => "cliente",
       :user => "administrador-cliente",
       :box => "ubuntu/bionic64"
-    }
+    },
+    {
+      :name => "Monitoring-Server",
+      :ip => "192.168.58.4",
+      :hostname => "monitor-server",
+      :memory => 1024,
+      :tag => "monitoring",
+      :user => "administrador-monitoreo"
+    },
   ]
  
   servers.each do |server|
@@ -76,7 +84,6 @@ Vagrant.configure("2") do |config|
         ansible.playbook = "site.yml"
         ansible.extra_vars = {
           ansible_ssh_common_args: "-o StrictHostKeyChecking=no",
-          ldap_server_ip: "192.168.58.4",
           ldap_base_dn: "dc=luthor,dc=corp"
         }
         ansible.tags = [server[:tag]]

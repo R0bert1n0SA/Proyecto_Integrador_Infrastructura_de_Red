@@ -1,0 +1,12 @@
+---
+# tasks file for Roles/ldap
+- name: Actualizar repositorios y paquetes y Reiniciar
+  import_tasks: ../../TareasComunes/01-sistema.yml
+
+- name: Instalar Docker
+  import_tasks: 02-docker.yml
+
+- name: Levantar stack de monitoreo
+  import_tasks: 03-compose.yml
+
+

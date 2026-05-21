@@ -1,0 +1,71 @@
+---
+- name: Crear directorio del proyecto de monitoreo
+  file:
+    path: /opt/monitoreo/provisioning/datasources
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+    recurse: yes
+
+- name: Crear directorio de dashboards
+  file:
+    path: /opt/monitoreo/provisioning/dashboards
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Copiar prometheus.yml
+  copy:
+    src: prometheus.yml
+    dest: /opt/monitoreo/prometheus.yml
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Copiar alerts.yml
+  copy:
+    src: alerts.yml
+    dest: /opt/monitoreo/alerts.yml
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Copiar alertmanager.yml
+  copy:
+    src: alertmanager.yml
+    dest: /opt/monitoreo/alertmanager.yml
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Copiar datasource de Grafana
+  template:
+    src: datasource.yml.j2
+    dest: /opt/monitoreo/provisioning/datasources/prometheus.yml
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Copiar docker-compose
+  template:
+    src: docker-compose.yml.j2
+    dest: /opt/monitoreo/docker-compose.yml
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Levantar stack de monitoreo
+  command: docker compose -f /opt/monitoreo/docker-compose.yml up -d
+  args:
+    chdir: /opt/monitoreo
+
+- name: Verificar que los contenedores están corriendo
+  command: docker compose -f /opt/monitoreo/docker-compose.yml ps
+  register: compose_status
+  changed_when: false
+
+- name: Mostrar estado de los contenedores
+  debug:
+    var: compose_status.stdout
