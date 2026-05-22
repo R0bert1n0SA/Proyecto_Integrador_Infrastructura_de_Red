@@ -36,7 +36,7 @@ Vagrant.configure("2") do |config|
     {
       :name => "cliente",
       :hostname => "cliente",
-      :memory => 4096,
+      :memory => 1024,
       :cpus => 1,
       :tag => "cliente",
       :user => "administrador-cliente",

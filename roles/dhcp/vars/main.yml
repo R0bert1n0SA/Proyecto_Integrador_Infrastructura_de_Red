@@ -7,7 +7,7 @@ dhcp_default_lease_time: 600
 dhcp_max_lease_time: 7200
 dhcp_subnet: "192.168.58.0"
 dhcp_netmask: "255.255.255.0"
-dhcp_range_start: "192.168.58.4"
+dhcp_range_start: "192.168.58.5"
 dhcp_range_end: "192.168.58.254"
 dhcp_routers: "192.168.58.1"
 dhcp_broadcast: "192.168.58.255"

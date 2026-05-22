@@ -1,2 +1,3 @@
 ---
 # vars file for monitoring-server
+grafana_admin_password : "1234"
