@@ -12,7 +12,7 @@
   file:
     path: /etc/bind/zones
     state: directory
-    owner: root
+    owner: bind
     group: bind
     mode: '0755'
 
@@ -38,7 +38,7 @@
   template:
     src: db.luthor.corp.j2
     dest: "/etc/bind/zones/db.{{ dns_domain }}"
-    owner: root
+    owner: bind
     group: bind
     mode: '0644'
   notify: Reiniciar BIND9
@@ -47,7 +47,7 @@
   template:
     src: db.58.168.192.j2
     dest: /etc/bind/zones/db.58.168.192
-    owner: root
+    owner: bind
     group: bind
     mode: '0644'
   notify: Reiniciar BIND9
@@ -74,6 +74,16 @@
     content: |
       nameserver 127.0.0.1
       search {{ dns_domain }}
+
+- name: Deshabilitar AppArmor para named
+  shell: |
+    ln -sf /etc/apparmor.d/usr.sbin.named /etc/apparmor.d/disable/
+    apparmor_parser -R /etc/apparmor.d/usr.sbin.named
+  args:
+    creates: /etc/apparmor.d/disable/usr.sbin.named
+  ignore_errors: yes
+
+
 
 # Asegurar que nsswitch use DNS
 - name: Configurar nsswitch.conf para usar DNS

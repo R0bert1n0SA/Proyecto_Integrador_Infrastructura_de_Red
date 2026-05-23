@@ -1,8 +1,5 @@
 // include "/etc/bind/zones.rfc1918";
-key "dhcp-update-key" {
-    algorithm hmac-sha256;
-    secret "{{ dhcp_tsig_secret }}";
-};
+include "/etc/bind/dhcp-update-key.key";
 // --- ZONA DIRECTA ---
 zone "{{ dns_domain }}" {
     type master;                                      

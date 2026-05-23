@@ -1,7 +1,7 @@
-{% if tsig_secret is defined %}
+{% if dhcp_ddns_enabled %}
 key "dhcp-update-key" {
   algorithm hmac-sha256;
-  secret "{{ tsig_secret }}";
+  secret "{{ tsig_secret  }}";
 }
 
 zone {{ dhcp_domain_name }}. {
@@ -17,6 +17,7 @@ zone {{ dhcp_subnet.split('.')[:3] | reverse | join('.') }}.in-addr.arpa. {
 ddns-update-style interim;
 ddns-domainname "{{ dhcp_domain_name }}.";
 ddns-rev-domainname "in-addr.arpa.";
+update-static-leases on;
 {% else %}
 ddns-update-style none;
 {% endif %}
@@ -43,7 +44,7 @@ host {{ host.name }} {
   fixed-address {{ host.ip }};
 {% endif %}
   option host-name "{{ host.hostname }}";
-{% if tsig_secret is defined %}
+{% if dhcp_ddns_enabled %}
   ddns-hostname "{{ host.hostname }}";
 {% endif %}
 }

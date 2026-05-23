@@ -12,6 +12,3 @@ dns_forwarders:
 # Lista de hosts para generar el archivo de zona
 dns_hosts:
   - { name: "ns", ip: "192.168.58.2" }
-  - { name: "auth", ip: "192.168.58.4" }
-  - { name: "sftp", ip: "192.168.58.5" }
-  - { name: "ssh", ip: "192.168.58.5" }
