@@ -46,7 +46,7 @@ Vagrant.configure("2") do |config|
       :name => "Monitoring-Server",
       :ip => "192.168.58.4",
       :hostname => "monitor-server",
-      :memory => 1024,
+      :memory => 2048,
       :tag => "monitoring",
       :user => "administrador-monitoreo"
     },
@@ -54,8 +54,8 @@ Vagrant.configure("2") do |config|
  
   servers.each do |server|
     config.vm.define server[:name] do |node|
-     node.vm.box = server[:box] || "ubuntu/jammy64"
-
+      node.vm.box = server[:box] || "ubuntu/jammy64"
+ 
       if server[:ip]
         node.vm.network "private_network", ip: server[:ip],
           virtualbox__intnet: "red-interna"
@@ -63,23 +63,30 @@ Vagrant.configure("2") do |config|
         node.vm.network "private_network", type: "dhcp",
           virtualbox__intnet: "red-interna"
       end
-
+ 
+      # Port forwarding solo para el servidor de monitoreo
+      if server[:name] == "Monitoring-Server"
+        node.vm.network "forwarded_port", guest: 3000, host: 3000   # Grafana
+        node.vm.network "forwarded_port", guest: 9090, host: 9090   # Prometheus
+        node.vm.network "forwarded_port", guest: 9093, host: 9093   # Alertmanager
+      end
+ 
       node.vm.hostname = server[:hostname]
-
+ 
       node.vm.provider "virtualbox" do |vb|
         vb.memory = server[:memory]
         vb.cpus = server[:cpus] || 1
         vb.name = "#{server[:name].capitalize}"
         vb.customize ["modifyvm", :id, "--macaddress2", server[:mac]] if server[:mac]
-       end
-
+      end
+ 
       node.vm.provision "shell", name: "crear-usuario", inline: <<-SHELL
         useradd -m -s /bin/bash #{server[:user]}
         echo "#{server[:user]}:1234" | chpasswd
         usermod -aG sudo #{server[:user]}
         echo "#{server[:user]} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/#{server[:user]}
       SHELL
-
+ 
       node.vm.provision "ansible" do |ansible|
         ansible.playbook = "site.yml"
         ansible.extra_vars = {

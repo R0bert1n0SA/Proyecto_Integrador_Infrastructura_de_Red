@@ -1,4 +1,4 @@
-# Instalación de paquete
+---
 - name: Instalación de bind9
   apt:
     name:
@@ -7,74 +7,15 @@
       - dnsutils
     state: present
     update_cache: yes
-
+ 
 - name: Asegurar que el directorio de zonas existe
   file:
     path: /etc/bind/zones
     state: directory
     owner: bind
     group: bind
-    mode: '0755'
-
-- name: Desplegar configuración de opciones (forwarders)
-  template:
-    src: named.conf.options.j2
-    dest: /etc/bind/named.conf.options
-    owner: root
-    group: bind
-    mode: '0644'
-  notify: Reiniciar BIND9
-
-- name: Desplegar configuración de zonas locales
-  template:
-    src: named.conf.local.j2
-    dest: /etc/bind/named.conf.local
-    owner: root
-    group: bind
-    mode: '0644'
-  notify: Reiniciar BIND9
-
-- name: Desplegar archivo de Zona Directa
-  template:
-    src: db.luthor.corp.j2
-    dest: "/etc/bind/zones/db.{{ dns_domain }}"
-    owner: bind
-    group: bind
-    mode: '0644'
-  notify: Reiniciar BIND9
-
-- name: Desplegar archivo de Zona Inversa
-  template:
-    src: db.58.168.192.j2
-    dest: /etc/bind/zones/db.58.168.192
-    owner: bind
-    group: bind
-    mode: '0644'
-  notify: Reiniciar BIND9
-
-- name: Deshabilitar systemd-resolved
-  service:
-    name: systemd-resolved
-    state: stopped
-    enabled: no
-
-# Eliminar el symlink que genera systemd-resolved
-- name: Eliminar symlink de resolv.conf
-  file:
-    path: /etc/resolv.conf
-    state: absent
-
-# Crear el resolv.conf apuntando a tu DNS
-- name: Configurar resolv.conf
-  copy:
-    dest: /etc/resolv.conf
-    owner: root
-    group: root
-    mode: '0644'
-    content: |
-      nameserver 127.0.0.1
-      search {{ dns_domain }}
-
+    mode: '0775'
+ 
 - name: Deshabilitar AppArmor para named
   shell: |
     ln -sf /etc/apparmor.d/usr.sbin.named /etc/apparmor.d/disable/
@@ -82,18 +23,96 @@
   args:
     creates: /etc/apparmor.d/disable/usr.sbin.named
   ignore_errors: yes
-
-
-
-# Asegurar que nsswitch use DNS
+ 
+- name: Deshabilitar systemd-resolved
+  service:
+    name: systemd-resolved
+    state: stopped
+    enabled: no
+ 
+- name: Eliminar symlink de resolv.conf
+  file:
+    path: /etc/resolv.conf
+    state: absent
+ 
+# Nameserver temporal para que BIND pueda arrancar y resolver durante el play
+- name: Configurar resolv.conf temporal con fallback externo
+  copy:
+    dest: /etc/resolv.conf
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      nameserver 8.8.8.8
+      search {{ dns_domain }}
+ 
+- name: Desplegar configuración de opciones (forwarders)
+  template:
+    src: named.conf.options.j2
+    dest: /etc/bind/named.conf.options
+    owner: root
+    group: bind
+    mode: '0644'
+ 
+- name: Desplegar configuración de zonas locales sin include TSIG
+  copy:
+    dest: /etc/bind/named.conf.local
+    owner: root
+    group: bind
+    mode: '0644'
+    content: |
+      // TSIG se agrega despues de generarla
+      zone "{{ dns_domain }}" {
+          type master;
+          file "/etc/bind/zones/db.{{ dns_domain }}";
+      };
+      zone "58.168.192.in-addr.arpa" {
+          type master;
+          file "/etc/bind/zones/db.58.168.192";
+      };
+ 
+- name: Desplegar archivo de Zona Directa
+  template:
+    src: db.luthor.corp.j2
+    dest: "/etc/bind/zones/db.{{ dns_domain }}"
+    owner: bind
+    group: bind
+    mode: '0644'
+ 
+- name: Desplegar archivo de Zona Inversa
+  template:
+    src: db.58.168.192.j2
+    dest: /etc/bind/zones/db.58.168.192
+    owner: bind
+    group: bind
+    mode: '0644'
+ 
+- name: Asegurar que BIND9 esté iniciado y habilitado
+  service:
+    name: named
+    state: restarted
+    enabled: yes
+ 
+- name: Esperar a que BIND9 responda
+  wait_for:
+    port: 53
+    delay: 2
+    timeout: 30
+ 
 - name: Configurar nsswitch.conf para usar DNS
   lineinfile:
     path: /etc/nsswitch.conf
     regexp: '^hosts:'
     line: 'hosts: files dns'
-
-- name: Asegurar que BIND9 esté iniciado y habilitado
-  service:
-    name: named
-    state: started
-    enabled: yes
+ 
+# Ahora que BIND está arriba, apuntar resolv.conf a localhost
+- name: Configurar resolv.conf final apuntando a BIND local
+  copy:
+    dest: /etc/resolv.conf
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      nameserver 127.0.0.1
+      nameserver 8.8.8.8
+      search {{ dns_domain }}

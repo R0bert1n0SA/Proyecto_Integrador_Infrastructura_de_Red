@@ -1,0 +1,77 @@
+---
+- name: Crear usuario node_exporter
+  user:
+    name: node_exporter
+    shell: /bin/false
+    system: yes
+    create_home: no
+ 
+- name: Verificar si node_exporter ya está instalado
+  stat:
+    path: /usr/local/bin/node_exporter
+  register: node_exporter_bin
+ 
+- name: Descargar Node Exporter
+  get_url:
+    url: https://github.com/prometheus/node_exporter/releases/download/v1.7.0/node_exporter-1.7.0.linux-amd64.tar.gz
+    dest: /tmp/node_exporter.tar.gz
+    mode: '0644'
+  when: not node_exporter_bin.stat.exists
+ 
+- name: Extraer Node Exporter
+  unarchive:
+    src: /tmp/node_exporter.tar.gz
+    dest: /tmp/
+    remote_src: yes
+  when: not node_exporter_bin.stat.exists
+ 
+- name: Mover binario al PATH
+  copy:
+    src: /tmp/node_exporter-1.7.0.linux-amd64/node_exporter
+    dest: /usr/local/bin/node_exporter
+    mode: '0755'
+    owner: node_exporter
+    group: node_exporter
+    remote_src: yes
+  when: not node_exporter_bin.stat.exists
+ 
+- name: Limpiar archivos temporales
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/node_exporter.tar.gz
+    - /tmp/node_exporter-1.7.0.linux-amd64
+ 
+- name: Crear servicio systemd para Node Exporter
+  copy:
+    dest: /etc/systemd/system/node_exporter.service
+    content: |
+      [Unit]
+      Description=Node Exporter
+      After=network.target
+ 
+      [Service]
+      User=node_exporter
+      Group=node_exporter
+      Type=simple
+      ExecStart=/usr/local/bin/node_exporter
+      Restart=always
+      RestartSec=5
+ 
+      [Install]
+      WantedBy=multi-user.target
+ 
+- name: Habilitar y arrancar Node Exporter
+  systemd:
+    name: node_exporter
+    state: started
+    enabled: yes
+    daemon_reload: yes
+ 
+- name: Verificar que Node Exporter responde
+  uri:
+    url: http://localhost:9100/metrics
+    status_code: 200
+  retries: 3
+  delay: 5

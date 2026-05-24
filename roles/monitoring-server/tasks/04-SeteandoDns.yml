@@ -1,0 +1,9 @@
+- name: Forzar el DNS apuntando a nuestro BIND9
+  ansible.builtin.copy:
+    content: |
+      nameserver 192.168.58.2
+      search luthor.corp
+    dest: /etc/resolv.conf
+    owner: root
+    group: root
+    mode: '0644'

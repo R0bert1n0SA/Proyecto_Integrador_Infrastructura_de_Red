@@ -17,3 +17,6 @@
 
 - name: Crear jaula sftp
   import_tasks: 05-Chroot.yml
+
+- name: Node Exporter 
+  import_tasks: ../../TareasComunes/node-Exporter.yml

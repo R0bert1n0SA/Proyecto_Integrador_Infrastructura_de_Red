@@ -1,0 +1,13 @@
+-sudo apt install -y jq
+
+
+
+-curl -s http://localhost:9090/api/v1/targets | jq -r '
+  ["SERVICIO", "ENDPOINT", "ESTADO", "ERROR"],
+  ["--------", "--------", "------", "-----"],
+  (.data.activeTargets[] | [
+    .labels.job,
+    .discoveredLabels.__address__,
+    (.health | ascii_upcase),
+    (if .lastError == "" then "Ninguno" else .lastError | split(":") | last | ltrimstr(" ") end)
+  ]) | @tsv' | column -t -s $'\t'

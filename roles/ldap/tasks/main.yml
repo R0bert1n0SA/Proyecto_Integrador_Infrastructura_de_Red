@@ -23,3 +23,6 @@
 
 - name: Crear Grupo Para SFTP
   import_tasks: 08-SFTPUsers-Group.yml
+
+- name: Node Exporter 
+  import_tasks: ../../TareasComunes/node-Exporter.yml

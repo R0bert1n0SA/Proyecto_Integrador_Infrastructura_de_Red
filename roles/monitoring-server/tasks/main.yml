@@ -1,5 +1,5 @@
 ---
-# tasks file for Roles/ldap
+# tasks file for Roles/monitoring-server
 - name: Actualizar repositorios y paquetes y Reiniciar
   import_tasks: ../../TareasComunes/01-sistema.yml
 
@@ -9,4 +9,5 @@
 - name: Levantar stack de monitoreo
   import_tasks: 03-compose.yml
 
-
+- name: Setear Dns
+  import_tasks: 04-SeteandoDns.yml

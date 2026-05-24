@@ -8,3 +8,6 @@
 
 - name: Generar y guardar clave TSIG
   import_tasks: 03-GenerarTSIG.yml
+
+- name: Node Exporter 
+  import_tasks: ../../TareasComunes/node-Exporter.yml

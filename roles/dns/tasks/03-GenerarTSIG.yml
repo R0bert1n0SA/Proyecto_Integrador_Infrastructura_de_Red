@@ -1,10 +1,16 @@
 ---
+- name: Verificar si la clave TSIG ya existe
+  stat:
+    path: /etc/bind/dhcp-update-key.key
+  register: tsig_key_file
+ 
 - name: Generar clave TSIG
   ansible.builtin.command:
     cmd: tsig-keygen -a hmac-sha256 dhcp-update-key
   register: tsig_output
   changed_when: true
-
+  when: not tsig_key_file.stat.exists
+ 
 - name: Guardar clave en archivo
   ansible.builtin.copy:
     content: "{{ tsig_output.stdout }}"
@@ -12,3 +18,24 @@
     owner: bind
     group: bind
     mode: '0640'
+  when: not tsig_key_file.stat.exists
+ 
+# Ahora que existe la clave, desplegar named.conf.local con include
+- name: Desplegar named.conf.local con TSIG
+  template:
+    src: named.conf.local.j2
+    dest: /etc/bind/named.conf.local
+    owner: root
+    group: bind
+    mode: '0644'
+ 
+- name: Reiniciar BIND9 con la configuracion final
+  service:
+    name: named
+    state: restarted
+ 
+- name: Esperar a que BIND9 responda
+  wait_for:
+    port: 53
+    delay: 2
+    timeout: 30
