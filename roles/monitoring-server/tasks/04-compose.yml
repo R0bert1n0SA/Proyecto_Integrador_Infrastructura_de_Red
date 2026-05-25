@@ -16,6 +16,40 @@
     group: root
     mode: '0755'
 
+- name: Crear directorio para guardar JSON de dashboards
+  file:
+    path: /opt/monitoreo/provisioning/dashboards_json
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Copiar el archivo JSON del dashboard a la VM
+  copy:
+    src: infraestructura-dashboard.json          
+    dest: /opt/monitoreo/provisioning/dashboards_json/mi-dashboard.json
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Crear la configuracion del proveedor (dashboard provider) en la VM
+  copy:
+    content: |
+      apiVersion: 1
+      providers:
+        - name: 'DefaultProvider'
+          orgId: 1
+          folder: ''
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /etc/grafana/provisioning/dashboards_json
+    dest: /opt/monitoreo/provisioning/dashboards/dashboards-provider.yml
+    owner: root
+    group: root
+    mode: '0644'
+
 - name: Copiar prometheus.yml
   copy:
     src: prometheus.yml

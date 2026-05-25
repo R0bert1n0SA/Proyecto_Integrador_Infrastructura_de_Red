@@ -31,6 +31,7 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - /opt/monitoreo/provisioning:/etc/grafana/provisioning
+      - /opt/monitoreo/provisioning/dashboards_json:/etc/grafana/provisioning/dashboards_json
     ports:
       - "3000:3000"
     networks:

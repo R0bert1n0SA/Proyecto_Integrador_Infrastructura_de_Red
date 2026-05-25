@@ -3,11 +3,11 @@
 - name: Actualizar repositorios y paquetes y Reiniciar
   import_tasks: ../../TareasComunes/01-sistema.yml
 
+- name: Setear Dns
+  import_tasks: 02-SeteandoDns.yml
+
 - name: Instalar Docker
-  import_tasks: 02-docker.yml
+  import_tasks: 03-docker.yml
 
 - name: Levantar stack de monitoreo
-  import_tasks: 03-compose.yml
-
-- name: Setear Dns
-  import_tasks: 04-SeteandoDns.yml
+  import_tasks: 04-compose.yml
