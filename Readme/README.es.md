@@ -32,33 +32,6 @@ Infraestructura de red completa virtualizada con Vagrant, VirtualBox y Ansible. 
 <img src="https://github.com/user-attachments/assets/40342574-188c-43bf-bf52-6cce153c45ac" width="800">
 
 
-
-```
-┌──────────────────────────────────────────────────────────┐
-│                   Red Interna (intnet)                    │
-│                   192.168.58.0/24                        │
-│                                                          │
-│  DNS/DHCP fijos          LDAP/SFTP dinámicos             │
-│  ┌──────────┐            ┌──────────┐                    │
-│  │   DNS    │◄───DDNS────│   DHCP   │                    │
-│  │ .58.2    │            │ .58.3    │                    │
-│  └──────────┘            └──────────┘                    │
-│       ▲                       ▲                          │
-│       │ auth.luthor.corp      │ IP dinámica              │
-│       │ sftp.luthor.corp      │                          │
-│  ┌──────────┐            ┌──────────┐                    │
-│  │   LDAP   │◄───users───│   SFTP   │                    │
-│  │ dinámica │            │ dinámica │                    │
-│  └──────────┘            └──────────┘                    │
-│       ▲              ▲        ▲              ▲           │
-│       │   métricas   │        │   métricas   │           │
-│  ┌──────────┐            ┌──────────┐                    │
-│  │ Monitor  │            │ Cliente  │                    │
-│  │ .58.4    │            │ dinámica │                    │
-│  └──────────┘            └──────────┘                    │
-└──────────────────────────────────────────────────────────┘
-```
-
 ### Servidores
 
 | Servidor | IP | Rol |
