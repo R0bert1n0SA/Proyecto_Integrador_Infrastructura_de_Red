@@ -29,6 +29,10 @@ Infraestructura de red completa virtualizada con Vagrant, VirtualBox y Ansible. 
 
 ## Arquitectura
 
+<img src="https://github.com/user-attachments/assets/40342574-188c-43bf-bf52-6cce153c45ac" width="800">
+
+
+
 ```
 ┌──────────────────────────────────────────────────────────┐
 │                   Red Interna (intnet)                    │
