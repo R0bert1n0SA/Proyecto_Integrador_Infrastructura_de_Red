@@ -29,31 +29,8 @@ Fullkomið sýndarvæðt netkerfi með Vagrant, VirtualBox og Ansible. Inniheldu
 
 ## Uppbygging
 
-```
-┌──────────────────────────────────────────────────────────┐
-│               Innra net (intnet)                         │
-│               192.168.58.0/24                            │
-│                                                          │
-│  Fastar DNS/DHCP             Kvik LDAP/SFTP              │
-│  ┌──────────┐            ┌──────────┐                    │
-│  │   DNS    │◄───DDNS────│   DHCP   │                    │
-│  │ .58.2    │            │ .58.3    │                    │
-│  └──────────┘            └──────────┘                    │
-│       ▲                       ▲                          │
-│       │ auth.luthor.corp      │ kvik IP                  │
-│       │ sftp.luthor.corp      │                          │
-│  ┌──────────┐            ┌──────────┐                    │
-│  │   LDAP   │◄───notend──│   SFTP   │                    │
-│  │  kvik    │            │  kvik    │                    │
-│  └──────────┘            └──────────┘                    │
-│       ▲              ▲        ▲              ▲           │
-│       │   mælingar   │        │   mælingar   │           │
-│  ┌──────────┐            ┌──────────┐                    │
-│  │  Eftirl. │            │  Biðlari │                    │
-│  │ .58.4    │            │  kvik    │                    │
-│  └──────────┘            └──────────┘                    │
-└──────────────────────────────────────────────────────────┘
-```
+<img src="https://github.com/user-attachments/assets/40342574-188c-43bf-bf52-6cce153c45ac" width="800">
+
 
 ### Þjónar
 
