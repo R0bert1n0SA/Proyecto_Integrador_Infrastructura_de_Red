@@ -29,7 +29,7 @@ Complete virtualized network infrastructure using Vagrant, VirtualBox, and Ansib
 
 ## Architecture
 
-<img src="" width="800">
+<img width="1264" height="842" alt="Image" src="https://github.com/user-attachments/assets/9c40ec52-99f4-4c04-90a4-258ca7ce1545" />
 
 
 ### Servers
