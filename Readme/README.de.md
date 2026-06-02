@@ -29,31 +29,7 @@ Vollständig virtualisierte Netzwerkinfrastruktur mit Vagrant, VirtualBox und An
 
 ## Architektur
 
-```
-┌──────────────────────────────────────────────────────────┐
-│                   Internes Netzwerk (intnet)              │
-│                   192.168.58.0/24                        │
-│                                                          │
-│  DNS/DHCP statisch          LDAP/SFTP dynamisch          │
-│  ┌──────────┐            ┌──────────┐                    │
-│  │   DNS    │◄───DDNS────│   DHCP   │                    │
-│  │ .58.2    │            │ .58.3    │                    │
-│  └──────────┘            └──────────┘                    │
-│       ▲                       ▲                          │
-│       │ auth.luthor.corp      │ dynamische IP            │
-│       │ sftp.luthor.corp      │                          │
-│  ┌──────────┐            ┌──────────┐                    │
-│  │   LDAP   │◄──Benutzer─│   SFTP   │                    │
-│  │ dynamisch│            │ dynamisch│                    │
-│  └──────────┘            └──────────┘                    │
-│       ▲              ▲        ▲              ▲           │
-│       │   Metriken   │        │   Metriken   │           │
-│  ┌──────────┐            ┌──────────┐                    │
-│  │ Monitor  │            │  Client  │                    │
-│  │ .58.4    │            │ dynamisch│                    │
-│  └──────────┘            └──────────┘                    │
-└──────────────────────────────────────────────────────────┘
-```
+<img src="" width="800">
 
 ### Server
 
