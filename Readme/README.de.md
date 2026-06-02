@@ -29,7 +29,7 @@ Vollständig virtualisierte Netzwerkinfrastruktur mit Vagrant, VirtualBox und An
 
 ## Architektur
 
-<img src="" width="800">
+<img src="https://github.com/user-attachments/assets/a2d1a67a-28ab-449e-9e8f-bd55f5befa98" width="800">
 
 ### Server
 
