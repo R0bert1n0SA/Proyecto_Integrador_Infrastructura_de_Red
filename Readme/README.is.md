@@ -29,7 +29,7 @@ Fullkomið sýndarvæðt netkerfi með Vagrant, VirtualBox og Ansible. Inniheldu
 
 ## Uppbygging
 
-<img src="https://github.com/user-attachments/assets/40342574-188c-43bf-bf52-6cce153c45ac" width="800">
+<img width="1264" height="842" alt="Image" src="https://github.com/user-attachments/assets/fd9e2d0b-2253-4de7-881a-12e1df1d401e" />
 
 
 ### Þjónar
