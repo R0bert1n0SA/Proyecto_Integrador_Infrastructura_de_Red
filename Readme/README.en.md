@@ -29,31 +29,8 @@ Complete virtualized network infrastructure using Vagrant, VirtualBox, and Ansib
 
 ## Architecture
 
-```
-┌──────────────────────────────────────────────────────────┐
-│                   Internal Network (intnet)               │
-│                   192.168.58.0/24                        │
-│                                                          │
-│  Fixed DNS/DHCP              Dynamic LDAP/SFTP           │
-│  ┌──────────┐            ┌──────────┐                    │
-│  │   DNS    │◄───DDNS────│   DHCP   │                    │
-│  │ .58.2    │            │ .58.3    │                    │
-│  └──────────┘            └──────────┘                    │
-│       ▲                       ▲                          │
-│       │ auth.luthor.corp      │ dynamic IP               │
-│       │ sftp.luthor.corp      │                          │
-│  ┌──────────┐            ┌──────────┐                    │
-│  │   LDAP   │◄───users───│   SFTP   │                    │
-│  │ dynamic  │            │ dynamic  │                    │
-│  └──────────┘            └──────────┘                    │
-│       ▲              ▲        ▲              ▲           │
-│       │   metrics    │        │   metrics    │           │
-│  ┌──────────┐            ┌──────────┐                    │
-│  │ Monitor  │            │  Client  │                    │
-│  │ .58.4    │            │ dynamic  │                    │
-│  └──────────┘            └──────────┘                    │
-└──────────────────────────────────────────────────────────┘
-```
+<img src="" width="800">
+
 
 ### Servers
 
