@@ -31,6 +31,8 @@ Complete virtualized network infrastructure using Vagrant, VirtualBox, and Ansib
 
 <img width="1264" height="842" alt="Image" src="https://github.com/user-attachments/assets/9c40ec52-99f4-4c04-90a4-258ca7ce1545" />
 
+## Grafana
+
 
 ### Servers
 
@@ -65,9 +67,9 @@ The SFTP server authenticates users against LDAP via nslcd. Users in the `SFTPUs
 
 The monitoring server runs Prometheus, Grafana, and Alertmanager inside Docker containers. Each VM has Node Exporter installed directly, exposing CPU, RAM, disk, and network metrics on port 9100. Prometheus collects them every 15 seconds and Grafana visualizes them in dashboards. Using Docker for the monitoring stack means if the VM is recreated, the entire environment is restored with a single `docker compose up`.
 
-### Ubuntu client with graphical interface
+### Ubuntu client 
 
-The client is launched as a VM with Ubuntu Desktop. It authenticates against LDAP, resolves names via the infrastructure's own DNS (`auth.luthor.corp`, `sftp.luthor.corp`), and accesses SFTP using its LDAP credentials.
+The client is launched as a VM with Ubuntu . It authenticates against LDAP, resolves names via the infrastructure's own DNS (`auth.luthor.corp`, `sftp.luthor.corp`), and accesses SFTP using its LDAP credentials.
 
 ### VirtualBox internal network (intnet)
 
@@ -172,14 +174,54 @@ vagrant ssh servidor-dhcp -c "cat /var/lib/dhcpd/dhcpd.leases"
 vagrant ssh servidor-monitoreo -c "docker compose -f /opt/monitoreo/docker-compose.yml ps"
 ```
 
-### 5. Access the monitoring stack
-
+### 5. Verify Prometheus target status
+ 
+To check whether all exporters are being scraped correctly, install `jq` (first time only) and run:
+ 
+```bash
+sudo apt install -y jq
+ 
+curl -s http://192.168.58.4:9090/api/v1/targets | jq -r '
+  ["SERVICE", "ENDPOINT", "STATE", "ERROR"],
+  ["-------", "--------", "-----", "-----"],
+  (.data.activeTargets[] | [
+    .labels.job,
+    .discoveredLabels.__address__,
+    (.health | ascii_upcase),
+    (if .lastError == "" then "None" else .lastError | split(":") | last | ltrimstr(" ") end)
+  ]) | @tsv' | column -t -s $'\t'
+```
+ 
+The output shows a table with each service name, its endpoint, its state (`UP` or `DOWN`), and any error message.
+ 
+### 6. Access the monitoring stack
+ 
 | Service | URL | User | Password |
 |---|---|---|---|
 | Grafana | http://192.168.58.4:3000 | admin | admin123 |
 | Prometheus | http://192.168.58.4:9090 | — | — |
 | Alertmanager | http://192.168.58.4:9093 | — | — |
-
+ 
+---
+ 
+## Reprovisioning a single server
+ 
+If you need to reprovision only one server without recreating the entire infrastructure:
+ 
+```bash
+# Reprovision only the DNS server
+vagrant provision dns_server
+ 
+# Reprovision only the LDAP server
+vagrant provision servidor-ldap
+ 
+# Reprovision only the SFTP server
+vagrant provision sftp_server
+ 
+# Reprovision only the monitoring server
+vagrant provision servidor-monitoreo
+```
+ 
 ---
 
 ## Project Structure
@@ -248,6 +290,60 @@ Users are created automatically during provisioning. They are organized into OUs
 
 Default LDAP administrator password: `1234`
 
+## Troubleshooting
+ 
+### LDAP or SFTP do not receive an IP from DHCP
+ 
+Make sure VirtualBox's built-in DHCP is disabled before running `vagrant up`:
+ 
+```bash
+VBoxManage dhcpserver modify --network "HostInterfaceNetworking-vboxnet0" --disable
+```
+ 
+If the VMs are already running with incorrect IPs, destroy and re-create them:
+ 
+```bash
+vagrant destroy servidor-ldap -f && vagrant up servidor-ldap
+vagrant destroy sftp_server -f && vagrant up sftp_server
+```
+ 
+### `vagrant up` fails midway through provisioning
+ 
+Ansible is idempotent — you can safely re-run the provisioner:
+ 
+```bash
+vagrant provision <server-name>
+```
+ 
+If the failure is in the client VM (which uses Ubuntu Bionic and may take longer), try:
+ 
+```bash
+vagrant reload cliente --provision
+```
+ 
+### Prometheus targets appear as DOWN
+ 
+Check that Node Exporter is running on the affected server:
+ 
+```bash
+vagrant ssh <server-name> -c "systemctl status node_exporter"
+```
+ 
+If the service is stopped, restart it:
+ 
+```bash
+vagrant ssh <server-name> -c "sudo systemctl restart node_exporter"
+```
+ 
+### LDAP authentication not working on the client
+ 
+Check that nslcd is running and that the LDAP server is reachable:
+ 
+```bash
+vagrant ssh cliente -c "systemctl status nslcd"
+vagrant ssh cliente -c "getent passwd | grep User"
+```
+ 
 ---
 
 ## Notes

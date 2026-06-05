@@ -31,6 +31,10 @@ Infraestructura de red completa virtualizada con Vagrant, VirtualBox y Ansible. 
 
 <img src="https://github.com/user-attachments/assets/40342574-188c-43bf-bf52-6cce153c45ac" width="800">
 
+## Grafana
+
+
+
 
 ### Servidores
 
@@ -65,9 +69,9 @@ El servidor SFTP autentica usuarios contra LDAP mediante nslcd. Los usuarios del
 
 El servidor de monitoreo corre Prometheus, Grafana y Alertmanager dentro de contenedores Docker. Cada VM de la infraestructura tiene Node Exporter instalado directamente, que expone métricas de CPU, RAM, disco y red en el puerto 9100. Prometheus las recolecta cada 15 segundos y Grafana las visualiza en dashboards. Usar Docker para el stack de monitoreo permite que si la VM se recrea, todo el entorno se levanta con un solo `docker compose up`.
 
-### Cliente Ubuntu con interfaz gráfica
+### Cliente Ubuntu 
 
-El cliente se levanta como VM con Ubuntu Desktop. Se autentica contra LDAP, resuelve nombres vía el DNS propio de la infraestructura (`auth.luthor.corp`, `sftp.luthor.corp`) y accede al SFTP con sus credenciales LDAP.
+El cliente se levanta como VM con Ubuntu  Se autentica contra LDAP, resuelve nombres vía el DNS propio de la infraestructura (`auth.luthor.corp`, `sftp.luthor.corp`) y accede al SFTP con sus credenciales LDAP.
 
 ### Red interna VirtualBox (intnet)
 
@@ -151,8 +155,10 @@ VBoxManage dhcpserver modify --network "HostInterfaceNetworking-vboxnet0" --disa
 ```bash
 vagrant up
 ```
-
 Vagrant levanta los servidores en orden: DNS → DHCP → Monitoreo → LDAP → SFTP → Cliente. Cada uno se provisiona automáticamente con Ansible.
+ 
+> **Tiempo estimado:** entre 15 y 25 minutos dependiendo de la velocidad de descarga de las boxes y del hardware del host.
+
 
 ### 4. Verificar que todo funciona
 
@@ -171,8 +177,29 @@ vagrant ssh servidor-dhcp -c "cat /var/lib/dhcpd/dhcpd.leases"
 # Verificar contenedores de monitoreo
 vagrant ssh servidor-monitoreo -c "docker compose -f /opt/monitoreo/docker-compose.yml ps"
 ```
+### 5. Verificar el estado de los targets de Prometheus
+ 
+Para ver si todos los exporters están siendo scrapeados correctamente, instalar `jq` (solo la primera vez) y ejecutar:
+ 
+```bash
+sudo apt install -y jq
+ 
+curl -s http://192.168.58.4:9090/api/v1/targets | jq -r '
+  ["SERVICIO", "ENDPOINT", "ESTADO", "ERROR"],
+  ["--------", "--------", "------", "-----"],
+  (.data.activeTargets[] | [
+    .labels.job,
+    .discoveredLabels.__address__,
+    (.health | ascii_upcase),
+    (if .lastError == "" then "Ninguno" else .lastError | split(":") | last | ltrimstr(" ") end)
+  ]) | @tsv' | column -t -s $'\t'
+```
+ 
+La salida muestra una tabla con el nombre del servicio, su endpoint, el estado (`UP` o `DOWN`) y el error si lo hay.
 
-### 5. Acceder al monitoreo
+
+
+### 6. Acceder al monitoreo
 
 | Servicio | URL | Usuario | Contraseña |
 |---|---|---|---|
@@ -180,6 +207,25 @@ vagrant ssh servidor-monitoreo -c "docker compose -f /opt/monitoreo/docker-compo
 | Prometheus | http://192.168.58.4:9090 | — | — |
 | Alertmanager | http://192.168.58.4:9093 | — | — |
 
+
+## Reprovisionar un servidor individual
+ 
+Si necesitás reprovisionar solo uno de los servidores sin recrear toda la infraestructura:
+ 
+```bash
+# Reprovisionar solo el servidor DNS
+vagrant provision dns_server
+ 
+# Reprovisionar solo el servidor LDAP
+vagrant provision servidor-ldap
+ 
+# Reprovisionar solo el servidor SFTP
+vagrant provision sftp_server
+ 
+# Reprovisionar solo el servidor de monitoreo
+vagrant provision servidor-monitoreo
+```
+ 
 ---
 
 ## Estructura del proyecto
@@ -301,6 +347,60 @@ Los usuarios se crean automáticamente al provisionar. Están organizados en OUs
 
 Contraseña por defecto de administrador LDAP: `1234`
 
+
+## Troubleshooting
+ 
+### LDAP o SFTP no reciben IP del DHCP
+ 
+Verificar que el DHCP de VirtualBox esté deshabilitado antes de correr `vagrant up`:
+ 
+```bash
+VBoxManage dhcpserver modify --network "HostInterfaceNetworking-vboxnet0" --disable
+```
+ 
+Si las VMs ya están corriendo con IP incorrecta, destruirlas y volver a levantarlas:
+ 
+```bash
+vagrant destroy servidor-ldap -f && vagrant up servidor-ldap
+vagrant destroy sftp_server -f && vagrant up sftp_server
+```
+ 
+### `vagrant up` falla a mitad del provisionamiento
+ 
+Ansible es idempotente, se puede volver a ejecutar el provisionamiento sin problema:
+ 
+```bash
+vagrant provision <nombre-del-servidor>
+```
+ 
+Si el fallo es en la VM del cliente (que usa Ubuntu Bionic y puede tardar más), probar:
+ 
+```bash
+vagrant reload cliente --provision
+```
+ 
+### Los targets de Prometheus aparecen como DOWN
+ 
+Verificar que Node Exporter esté activo en el servidor afectado:
+ 
+```bash
+vagrant ssh <nombre-del-servidor> -c "systemctl status node_exporter"
+```
+ 
+Si el servicio está caído, reiniciarlo:
+ 
+```bash
+vagrant ssh <nombre-del-servidor> -c "sudo systemctl restart node_exporter"
+```
+ 
+### Autenticación LDAP no funciona en el cliente
+ 
+Verificar que nslcd esté corriendo y que el servidor LDAP sea alcanzable:
+ 
+```bash
+vagrant ssh cliente -c "systemctl status nslcd"
+vagrant ssh cliente -c "getent passwd | grep User"
+```
 ---
 
 ## Notas
