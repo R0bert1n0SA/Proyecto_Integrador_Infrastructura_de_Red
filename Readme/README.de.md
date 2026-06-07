@@ -31,6 +31,10 @@ Vollständig virtualisierte Netzwerkinfrastruktur mit Vagrant, VirtualBox und An
 
 <img width="1264" height="842" alt="Image" src="https://github.com/user-attachments/assets/7f79c411-3651-4b92-b0c8-3ed7fad74689" />
 
+## Grafana 
+
+<img width="1361" height="623" alt="Image" src="https://github.com/user-attachments/assets/e174c583-711f-4372-acd1-4f7b301a8d77" />
+
 ### Server
 
 | Server | IP | Rolle |
