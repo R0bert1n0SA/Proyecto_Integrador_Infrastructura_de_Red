@@ -33,7 +33,7 @@ Infraestructura de red completa virtualizada con Vagrant, VirtualBox y Ansible. 
 
 ## Grafana
 
-
+<img width="1361" height="623" alt="Image" src="https://github.com/user-attachments/assets/e174c583-711f-4372-acd1-4f7b301a8d77" />
 
 
 ### Servidores
